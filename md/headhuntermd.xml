@@ -24,7 +24,7 @@
                 </check_all>
             </conditions>
             <actions>
-                <set_value name="$HHDebug" exact="100" />
+                <set_value name="$HHDebug" exact="0" />
                 <set_value name="$enemy" exact="event.param2" />
                 <set_value name="$enemy.pilot.$beenattacked" exact="true" />
                 <set_value name="$enemy.pilot.$attackedtime" exact="player.age" />
@@ -101,23 +101,25 @@
                 </cue>
             </cues>
         </cue>
-        <cue name="HHGatherTimer" instantiate="true" checkinterval="15s" checktime="player.age + 15s">
+        <cue name="PapaCue" instantiate="true">
+        <actions>
+            <debug_text text="'HeadHunter PapaCue Activate. Ready to start tracking.'" />
+            <create_group groupname="global.$HHAllShips" />
+            <create_group groupname="global.$HHAllWanted" />
+        </actions>
+        <cues>
+        <cue name="HHGatherTimer" instantiate="true" checkinterval="10s" checktime="player.age + 5s">
 			<actions>
                 <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                    text="'HHGatherTimer firing...WatcherState: %s'.[md.HeadHunterMD.WantedDestructionTracker.state]"
-                    output="false" append="true" chance="100" />
-                <do_if value="md.HeadHunterMD.WantedDestructionTracker.state == cuestate.active">
-                    <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                    text="'DestructionTracker was active. Cancelling before initiating.'"
-                    output="false" append="true" chance="100" />
-                </do_if>
+                    text="'HHGatherTimer firing...'"
+                    output="false" append="true" chance="0" />
 				<signal_cue_instantly cue="GatherAllYeShips"/>
 			</actions>
 		</cue>
         <cue name="GatherAllYeShips" instantiate="true">
             <conditions><event_cue_signalled /></conditions>
             <actions>
-                <find_ship space="player.galaxy" checkoperational="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" groupname="$HHAllShips" multiple="true" >
+                <find_ship space="player.galaxy" checkoperational="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" groupname="global.$HHAllShips" multiple="true" >
                     <match shiptype="shiptype.xsdrone" negate="true" />
                     <match shiptype="shiptype.escapepod" negate="true" />
                     <match shiptype="shiptype.distressdrone" negate="true" />
@@ -125,22 +127,24 @@
                     <match shiptype="shiptype.smalldrone" negate="true" />
                     <match owner="[faction.buccaneers,faction.civilian,faction.criminal,faction.khaak,faction.ownerless,faction.player,faction.scaleplate,faction.yaki,faction.xenon,faction.visitor]" negate="true" />
                 </find_ship>
-                <create_group groupname="$HHAllWanted" />
-                <do_for_each name="$wantedship" in="global.$HeadHunterWantedTracker.keys.list">
-                    <add_to_group groupname="$HHAllWanted" object="$wantedship" />
+                <create_group groupname="global.$HHAllWanted" />
+                <do_for_each name="$wantedshipship" in="global.$HeadHunterWantedTracker">
+                    <do_if value="$wantedshipship.exists">
+                        <add_to_group groupname="global.$HHAllWanted" object="$wantedshipship" />
+                    </do_if>
                 </do_for_each>
-                <!--<set_value name="$HHAllWanted" exact="global.$HeadHunterWantedTracker.keys.list"/>-->
                 <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                    text="'Gathering all ships in the galaxy! Total watching: %s Total Wanted: %s'.[$HHAllShips.count,$HHAllWanted.count]"
-                    output="false" append="true" chance="100" />
+                    text="'Gathering all ships in the galaxy! Total watching: %s Total Wanted: %s'.[global.$HHAllShips.count,global.$HHAllWanted.count]"
+                    output="false" append="true" chance="0" />
             </actions>
         </cue>
-        <cue name="WantedDestructionTracker" instantiate="true">
+        <cue name="WantedDestructionTracker" instantiate="true" >
                     <conditions>
-                        <!--<check_value value="$HHAllShips?" />-->
                     <check_all>
-                        <event_object_destroyed group="GatherAllYeShips.$HHAllShips" />
-                        <check_value value="not GatherAllYeShips.$HHAllShips.indexof.{event.param}"/> <!-- if a wanted ship is killed, we don't want to add the Wanted killer to the wanted board. They should be left in peace for a job well done! -->
+                        <event_object_destroyed group="global.$HHAllShips" />
+                        <check_value value="not global.$HHAllWanted.indexof.{event.param}"/> <!-- if a wanted ship is killed, we don't want to add the Wanted claimer to the wanted board. They should be left in peace for a job well done! -->
+                        <check_value value="event.param.isclass.ship" />
+                        <check_value value="event.object.isclass.ship"/> <!-- TODO: maybe temporary to doulecheck that victim is a ship -->
                         <check_any>
                             <check_value value="event.param.isclass.ship_s" />
                             <check_value value="event.param.isclass.ship_m" />
@@ -149,70 +153,88 @@
                         </check_any>
                     </check_all>
                     </conditions>
-                    <delay exact="1s"/>
                     <actions>
-                        <set_value name="$HHAllShips" exact="GatherAllYeShips.$HHAllShips" />
-                        <remove_from_group group="$HHAllShips" object="event.object" />
                         <set_value name="$victim" exact="event.object" />
-                        <set_value name="$killer" exact="event.param" />
-                        <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'\nDestruction detected: %s %s killed by %s %s \nKiller faction was %s and Victim faction was %s \nThe value of the ship was: %s'.[event.object.idcode,event.object.knownname,event.param.idcode,event.param.knownname,$killer.trueowner,$victim.trueowner,$victim.value.formatted.default]"
+                        <do_if value="event.param.typename == 'Drone' or event.param.islasertower">
+                            <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                            text="'\n%s was the killer so setting as commander: Vic: %s %s Real Killer: %s %s'.[@event.param.typename,event.object.idcode,event.object.knownname,event.param.commander.idcode,event.param.commander.knownname]"
                             output="false" append="true" chance="100" />
+                            <set_value name="$killer" exact="event.param.commander" />
+                        </do_if>
+                        <do_else>
+                            <set_value name="$killer" exact="event.param" />
+                        </do_else>
+                        <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                            text="'\nDestruction detected: VictimClass: %s Victim: %s %s Killer: %s %s \nKiller faction: %s Victim faction: %s \nShip value: %s'.[@$victim.class,@event.object.idcode,event.object.knownname,event.param.idcode,event.param.knownname,$killer.trueowner,$victim.trueowner,$victim.value.formatted.default]"
+                            output="false" append="true" chance="0" />
 
                         <!-- Killer already on the board. Add the value -->
                         <do_if value="global.$HeadHunterWantedTracker.{$killer}?">
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'SERIAL KILLER: Killer already on the board. Adding %s to %s'.[global.$HeadHunterWantedTracker.{$killer}.formatted.default,$victim.value.formatted.default]"
+                            text="'SERIAL KILLER: Killer already on the board. Adding %s to %s'.[global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default,$victim.value.formatted.default]"
                             output="false" append="true" chance="100" />
-                            <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="global.$HeadHunterWantedTracker.{$killer} + $victim.value" />
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}.$value" exact="global.$HeadHunterWantedTracker.{$killer}.$value + $victim.value" />
+                            <!--<set_value name="$killer.pilot.$lastseen" exact="$killer.sector" />
+                            <set_value name="$killer.pilot.$lastvictim" exact="$victim" />-->
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'New total is: %s'.[global.$HeadHunterWantedTracker.{$killer}.formatted.default]"
+                            text="'New total is: %s'.[global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
                             output="false" append="true" chance="100" />
                         </do_if>
                         
                         <!-- Killer is new. Add to the board -->
                         <do_else>
-                            <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="$victim.value" />
-                            <set_value name="$killer.pilot.$lastseen" exact="$killer.sector" />
+                            <do_if value="($victim.value == null)">
+                                <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                            text="'\nERROR: A victim value was null for some reason. Skipping.'.[@$killer.idcode,@$killer.knownname,@$victim.idcode,@$victim.knownname]"
+                            output="false" append="true" chance="100" />
+                                <break />
+                            </do_if>
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = $victim.value,$lastseen = $killer.sector,$lastvictim = $victim]" />
+                            <!--<set_value name="$killer.pilot.$lastseen" exact="$killer.sector" />
+                            <set_value name="$killer.pilot.$lastvictim" exact="$victim" /> -->
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'NEW WANTED: Killer is brand new. Adding %s to the board.'.[global.$HeadHunterWantedTracker.{$killer}.formatted.default]"
+                            text="'NEW WANTED: Killer is brand new. Adding Killer: %s Key: %s Value: %s to the board.'.[$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
                             output="false" append="true" chance="100" />
                         </do_else>
-                        
-                        <!-- temp display the bounty board-->
-                        <!--<do_for_each name="$bleh" in="global.$HeadHunterWantedTracker">
-                            <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'(HeadHunter Table) Killer: %s %s || Running Total: %s || Last Spotted: %s'.[$bleh.idcode,$bleh.knownname,global.$HeadHunterWantedTracker.{$bleh}.formatted.default,$bleh.pilot.$lastseen.knownname]"
-                            output="false" append="true" chance="100" />
-                        </do_for_each>-->
                     </actions>
-        </cue>
+            </cue>
         <cue name="WantedClaimTracker" instantiate="true">
-                    <conditions>
-                        <check_all>
-                            <event_object_destroyed group="GatherAllYeShips.$HHAllWanted" />
-                        </check_all>
-                    </conditions>
-                    <delay exact="1s" />
-                    <actions>
-                        <set_value name="$HHAllWanted" exact="GatherAllYeShips.$HHAllWanted"/>
-                        <remove_from_group group="$HHAllWanted" object="event.object" />
-                        <set_value name="$wantedship" exact="event.object"/>
-                        <set_value name="$wantedclaimer" exact="event.param"/>
-                        <set_value name="$claimsector" exact="$wantedship.sector.knownname" />
-                        <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'CLAIM: A Wanted ship has been destroyed in %s: %s %s that had a bounty on their head of %s'.[$claimsector,event.object.idcode,event.object.knownname,global.$HeadHunterWantedTracker.{$wantedship}.formatted.default]"
-                            output="false" append="true" chance="100" />
-                        <do_if value="global.$HeadHunterNotify">
-							<show_notification
-								text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.formatted.default]" priority="5" />
-						</do_if>
-                        <write_to_logbook category="alerts"
-                                    title="'HEAD CLAIMED:'"
-                                    text="'%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.formatted.default]"
-                                    interaction="showonmap" object="$wantedship" />
-                        <remove_value name="global.$HeadHunterWantedTracker.{event.object}" />
-                    </actions>
+            <conditions>
+                <check_all>
+                    <event_object_destroyed group="global.$HHAllWanted" />
+                    <check_value value="event.param.knownname?" />
+                </check_all>
+            </conditions>
+            <actions>
+                <!-- TODO: temp debug to compare lists -->
+                <do_for_each name="$temp" in="global.$HHAllWanted">
+                    <debug_to_file name="'wanted'" directory="'HeadHunter'" text="'global.$HHAllWanted: %s %s'.[$temp.idcode,$temp.knownname]" output="false" append="true" chance="100" />
+                </do_for_each>
+                <do_for_each name="$temptwo" in="global.$HeadHunterWantedTracker">
+                    <debug_to_file name="'wanted'" directory="'HeadHunter'" text="'$HeadHunterWantedTracker: %s %s'.[$temptwo.idcode,$temptwo.knownname]" output="false" append="true" chance="100" />
+                </do_for_each>
+
+                <set_value name="$wantedship" exact="event.object"/>
+                <set_value name="$wantedclaimer" exact="event.param"/>
+                <set_value name="$claimsector" exact="$wantedship.sector.knownname" />
+                <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                    text="'CLAIM: A Wanted ship has been destroyed in %s: %s %s that had a bounty on their head of %s'.[$claimsector,event.object.idcode,event.object.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
+                    output="false" append="true" chance="100" />
+                <do_if value="global.$HeadHunterNotify">
+				    <show_notification text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]" priority="5" />
+                <write_to_logbook category="alerts"
+                        title="'HEAD CLAIMED:'"
+                        text="'%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
+                        interaction="showonmap" object="$wantedship" />
+                </do_if>
+                <remove_value name="global.$HeadHunterWantedTracker.{event.object}" />
+                <!-- TODO: add actual money transfer part and verify wantedship is removed from the bounty board -->
+                <!-- TODO: add logic to double rep gain from general bounty for wanted kill -->
+                <!-- TODO: gravidar event checking for updating last spotted location and audio or speak line if possible is player comes across a wanted ship -->
+                <!-- TODO: change gatherallyeships interval to reasonable level -->
+            </actions>
          </cue>
+         </cues>
+        </cue>
     </cues>
 </mdscript>

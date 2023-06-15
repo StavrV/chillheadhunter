@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="FirstTimeSetup">
+        <cue name="LoadStuffAndSetup">
 			<conditions>
-				<check_any>
-					<event_universe_generated/>
-					<event_cue_signalled cue="md.Setup.Start"/>
-				</check_any>
+				<event_universe_generated/>
 			</conditions>
 			<actions>
                 <debug_text text="'HeadHunter setup check...'" filter="scripts" />
 				<do_if value="not global.$HeadHunterWantedTracker?">
-					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" /> <!-- TODO: needs to be a table -->
+					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" />
                     <set_value name="global.$HeadHunterNotify" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
                     <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
                 <do_else>
-                    <debug_text text="'HeadHunter: initial variables were set so carrying on. WantedTracker: %s\nNotify: %s\nMultiplier: %s'.[global.$HeadHunterWantedTracker,global.$HeadHunterNotify,global.$HeadHunterBountyMultiplier]" filter="scripts"/>
+                    <debug_text text="'HeadHunter Wanted Board was ready.'" filter="scripts" />
                 </do_else>
 			</actions>
 		</cue>
@@ -51,8 +48,8 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Bounty Claim Notifications',
-								$mouseOverText= 'Notification popups when a bounty is claimed in the galaxy',
+								$text = 'Wanted Claim Notifications',
+								$mouseOverText= 'Receive notifications and logbook for Galaxy-wide Wanted claims. Disabled is only player.',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
@@ -71,7 +68,7 @@
                             param="table[
 								$col = 1,
 								$colSpan = 1,
-								$text = 'Bounty Multiplier',
+								$text = 'General Bounty Multiplier',
 								$mouseOverText= '1.0x is mod default',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider" 
@@ -91,20 +88,41 @@
                                 param="table[
                                     $col = 1,
                                     $colSpan = 2,
-                                    $text = 'Clear Wanted Board',
-                                    $mouseOverText= 'BLEH!',
+                                    $text = 'Reset Wanted Board',
+                                    $mouseOverText= 'Cannot be undone!',
                                 ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                                 param="table[
                                     $col = 3, 
                                     $colSpan = 1,
                                     $text = table[
-                                    $text   =  'Do eeet!', 
+                                    $text   =  'RESET', 
                                     $color  =  'Helper.color.red',
                                     $halign = 'center',
                                     ],
                                     $onClick = ClearWantedBoard,
                                     $onRightClick = ClearWantedBoard,
+                                ]" />
+                            <!-- TODO: Temp for debug -->
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                                param="table[
+                                    $col = 1,
+                                    $colSpan = 2,
+                                    $text = 'Print Wanted Board',
+                                    $mouseOverText= '',
+                                ]" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                                param="table[
+                                    $col = 3, 
+                                    $colSpan = 1,
+                                    $text = table[
+                                    $text   =  'Print to log', 
+                                    $color  =  'Helper.color.white',
+                                    $halign = 'center',
+                                    ],
+                                    $onClick = PrintWantedBoard,
+                                    $onRightClick = PrintWantedBoard,
                                 ]" />
                     </actions>
                 </cue>
@@ -130,6 +148,21 @@
                     </conditions>
                     <actions>
                         <clear_table table="global.$HeadHunterWantedTracker" />
+                        <clear_group group="global.$HHAllShips" />
+                        <clear_group group="global.$HHAllWanted" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="PrintWantedBoard" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker" >
+                            <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                            text="'(HeadHunter Table) Killer: %s %s || Running Total: %s || Last Spotted: %s || Last Victim: %s'.[global.$HeadHunterWantedTracker.{$bleh}.$killer.idcode,global.$HeadHunterWantedTracker.{$bleh}.$killer.knownname,global.$HeadHunterWantedTracker.{$bleh}.$value.formatted.default,global.$HeadHunterWantedTracker.{$bleh}.$lastseen.knownname,global.$HeadHunterWantedTracker.{$bleh}.$lastvictim.knownname]"
+                            output="false" append="true" chance="100" /> <!-- TODO: change chance -->
+                        </do_for_each>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>
                 </cue>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="HeadHunterBoard" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+    <cues>
+		<cue name="Setup" namespace="this">
+			<conditions>
+				<check_any>
+					<event_universe_generated/>
+					<event_cue_signalled cue="md.Setup.Start"/>
+				</check_any>
+			</conditions>
+			<actions>
+                <debug_text text="'HeadHunter Wanted Board initial setup.'" />
+                    <do_if value="not global.$HHSortValue?">
+                        <set_value name="global.$HHSortValue" exact="true" />
+                    </do_if>
+                <debug_text text="'HeadHunter Board: initial variables set so carrying on.'" />
+			</actions>
+		</cue>
+        <cue name="HeadHunterBoardInit" instantiate="false">
+            <actions>
+                <set_value name="$HHDebug" exact="100" />
+                <include_actions ref="GetFactions" />
+            </actions>
+            <cues>
+                <cue name="RegisterHHBoard" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled cue="md.Simple_Menu_API.Reloaded" />
+                    </conditions>
+                    <actions>
+                        <signal_cue_instantly
+                            cue="md.Simple_Menu_API.Register_Options_Menu"
+                            param="table[
+                    $id = 'HHBoard',
+                    $columns = 12, 
+                    $title = 'HeadHunter Wanted Board',
+                    $onOpen = HHBoard
+                    ]" />
+                    </actions>
+                </cue>
+                <cue name="HHBoard" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <do_if value="not $SelectedFaction?">
+							<set_value name="$SelectedFaction" exact="'All'"/>
+						</do_if>
+                        <include_actions ref="Add_Faction_Dropdown"/>
+                        <include_actions ref="Add_Horizontal_Line"/>
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" param="table[$selectable = false]"/>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col = 1, $colSpan=4, $text = 'Wanted Ship',]"/>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col = 5, $colSpan=2, $text = 'Wanted Reward',]"/>
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col = 7, $colSpan=3, $text = 'Last Spotted',]"/>
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[$col = 10, $colSpan=3, $text = 'Wanted By',]"/>
+                        <include_actions ref="Add_Horizontal_Line"/>
+                        <include_actions ref="PopulateWantedRows" />
+                    </actions>
+                </cue>
+                <cue name="FactionSelected" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+						<set_value name="$args" exact="event.param"/>
+						<do_if value="$args.$echo.$type == 'dropdown'">
+							<set_value name="global.{$args.$echo.$name}" exact="$args.$option.$value"/>
+						</do_if>
+						<do_else>
+							<set_value name="global.{$args.$echo.$name}" exact="$args.$echo.$value"/>
+						</do_else>
+						<do_if value="$args.$echo.$refresh">
+							<signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu"/>
+						</do_if>
+                        <debug_text text="'HHBoard: Dropdown selected: %s'.[$args.$option.$value]" chance="$HHDebug" filter="scripts"/>
+                        <set_value name="$SelectedFaction" exact="$args.$option.$value" />
+					</actions>
+                </cue>
+                <library name="GetFactions">
+                    <actions>
+                        <do_if value="$FactionList?">
+							<clear_list list="$FactionList"/>
+						</do_if>
+						<do_else>
+							<create_list name="$FactionList"/>
+						</do_else>
+                        <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker">
+                            <do_if value="not $FactionList.indexof.{$bleh.trueowner}">
+                                <append_to_list name="$FactionList" exact="$bleh.trueowner" />
+                            </do_if>
+                        </do_for_each>
+                        <sort_list list="$FactionList" sortbyvalue="loop.element.knownname"/>
+                        <set_value name="$FactionList.{1}" exact="'All'" operation="insert" />
+                        <debug_text text="'HeadHunter Board: Factions loaded to $FactionList'" filter="scripts" chance="$HHDebug" />
+                    </actions>
+                </library>
+                <!-- Much of this faction dropdown menu library is by DeadAir with permission because I was too dumb to figure out "Simple" Menu dropdown callbacks -->
+                <library name="Add_Faction_Dropdown">
+					<actions>
+						<include_actions ref="GetFactions"/>
+						<!--Figure out which entry is currently selected.-->
+						<set_value name="$dropdown_index" exact="if $SelectedFaction then $FactionList.indexof.{$SelectedFaction} else 'All'"/>
+						<!--Translate to list of tables, that pair factions with names.-->
+						<set_value name="$options_list" exact="[]"/>
+						<do_for_each name="$faction" in="$FactionList">
+                            <do_if value="$faction == 'All'">
+                                <set_value name="$name" exact="'MOST WANTED'" />
+                            </do_if>
+                            <do_else>
+							    <set_value name="$name" exact="'%s'.[$faction.knownname]"/>
+                            </do_else>
+							<append_to_list name="$options_list" exact="table[
+							$text = $name,
+							$value = $faction,
+							]"/>
+						</do_for_each>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+							$col = 1,
+							$colSpan = 2,
+							$text = 'Target Faction:',
+							]"/>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Dropdown" param="table[
+							$col = 3, 
+							$options = $options_list,
+							$startOption = $dropdown_index,
+							$colSpan = 4,
+							$onDropDownConfirmed = FactionSelected,
+							$echo = table[
+								$type  = 'dropdown',
+								$name  = '$SelectedFaction',
+								$refresh = true,
+								],
+							]"/>
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 7, 
+								$colSpan = 2,
+								$text = table[
+								  $text   =  if global.$HHSortValue == true then 'By Value' else 'By Distance', 
+								  $color  =  if global.$HHSortValue == true then 'Helper.color.green' else 'Helper.color.blue',
+								  $halign = 'center',
+								],
+								$onClick = HHToggleSort,
+								$onRightClick = HHToggleSort,
+							]" />
+					</actions>
+				</library>
+                <library name="PopulateWantedRows">
+                    <actions>
+                        <set_value name="$AllWantedCopy" exact="global.$HHAllWanted" />
+                        <do_if value="global.$HHSortValue == true">
+                            <sort_group group="$AllWantedCopy" sortbyvalue="global.$HeadHunterWantedTracker.{loop.element}.$value" sortdescending="true" />
+                        </do_if>
+                        <do_else>
+                            <sort_group group="$AllWantedCopy" sortbygatedistanceto="player.entity" sortdescending="false"/>
+                        </do_else>
+                        <do_if value="$SelectedFaction == 'All'">
+                            <do_for_each name="$wantedship" in="$AllWantedCopy" counter="$i">
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 1,
+                                        $colSpan = 4,
+                                        $text = $wantedship.idcode + ' ' + $wantedship.knownname,
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 5,
+                                        $colSpan = 2,
+                                        $text = global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default + 'Cr',
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 7,
+                                        $colSpan = 3,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastseen? then global.$HeadHunterWantedTracker.{$wantedship}.$lastseen.knownname else 'Unknown' ,
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 10,
+                                        $colSpan = 3,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner.knownname else 'Unknown' ,
+                                        ]"/>
+                                    <!-- Top 100 -->
+                                    <do_if value="$i ge 100"><break /></do_if>
+                            </do_for_each>
+                        </do_if>
+                        <do_else>
+                            <do_for_each name="$wantedship" in="$AllWantedCopy" counter="$i">
+                                <do_if value="$wantedship.trueowner == $SelectedFaction">
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 1,
+                                        $colSpan = 4,
+                                        $text = $wantedship.idcode + ' ' + $wantedship.knownname,
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 5,
+                                        $colSpan = 2,
+                                        $text = global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default + 'Cr',
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 7,
+                                        $colSpan = 3,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastseen? then global.$HeadHunterWantedTracker.{$wantedship}.$lastseen.knownname else 'Unknown',
+                                        ]"/>
+                                    <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+                                        $col = 10,
+                                        $colSpan = 3,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner.knownname else 'Unknown' ,
+                                        ]"/>
+                                    <!-- Top 100 -->
+                                    <do_if value="$i ge 100"><break /></do_if>
+                                </do_if>
+                            </do_for_each>
+                        </do_else>
+                    </actions>
+                </library>
+                <library name="Add_Horizontal_Line">
+					<actions>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" param="table[$selectable = false]"/>
+						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
+								$col = 1, 
+								$colSpan = event.param.$columns,
+								$height = 1,
+								$fontsize = 1,
+								$cellBGColor = 'Helper.color.darkorange',
+							]"/>
+					</actions>
+				</library>
+                <cue name="HHToggleSort" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HHSortValue"
+                            exact="if global.$HHSortValue == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+            </cues>
+        </cue>
+    </cues>
+</mdscript>
