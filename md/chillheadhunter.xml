@@ -48,7 +48,7 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Wanted Claim Notifications',
+								$text = 'Global Wanted Claim Notifications',
 								$mouseOverText= 'Receive notifications and logbook for Galaxy-wide Wanted claims. Disabled is only player.',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"

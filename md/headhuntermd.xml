@@ -160,7 +160,10 @@
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'\n%s was the killer so setting as commander: Vic: %s %s Real Killer: %s %s'.[@event.param.typename,event.object.idcode,event.object.knownname,event.param.commander.idcode,event.param.commander.knownname]"
                             output="false" append="true" chance="100" />
-                            <set_value name="$killer" exact="event.param.commander" />
+                            <do_if value="event.param.commander.isclass.ship"> <!-- Because lo and behold a station can get on the list if its drones kill somebody... --> 
+                                <set_value name="$killer" exact="event.param.commander" />
+                            </do_if>
+                            <do_else><break /></do_else>
                         </do_if>
                         <do_else>
                             <set_value name="$killer" exact="event.param" />
@@ -192,10 +195,8 @@
                             </do_if>
                             <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = $victim.value - ($victim.seed % ($victim.value / 10)),$lastseen = $killer.sector,$lastvictim = $victim]" />
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'NEW WANTED: Killer is brand new. Adding Killer: %s Key: %s Value: %s to the board.'.[$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
+                            text="'NEW WANTED: Killer is brand new. Adding Killer: %s Value: %s to the board.'.[$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
                             output="false" append="true" chance="100" />
-                            <!-- TODO: just for testing -->
-                            <speak actor="player.computer" line="279" comment="Incoming fund transfer." />
                         </do_else>
                     </actions>
             </cue>
@@ -222,23 +223,79 @@
                     text="'CLAIM: A Wanted ship has been destroyed in %s: %s %s that had a bounty on their head of %s'.[$claimsector,event.object.idcode,event.object.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
                     output="false" append="true" chance="100" />
                 <do_if value="global.$HeadHunterNotify or $wantedclaimer.isplayerowned">
-				    <show_notification text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]" priority="90" />
+				    <show_notification text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]" priority="1" />
                 <write_to_logbook category="alerts"
                         title="'HEAD CLAIMED:'"
                         text="'%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
                         interaction="showonmap" object="$wantedship" money="if $wantedship.isplayerowned then ($wantedship.$value)Cr else null" />
                 </do_if>
                 <do_if value="$wantedclaimer.isplayerowned">
-                    <speak actor="computer" line="279" comment="Incoming fund transfer." />
-                    <transfer_money from="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner" to="faction.player" amount="($wantedship.$value)Cr" />
-                    <add_faction_relation faction="faction.player" otherfaction="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner" value="0.00016LF + (0.0064LF / (2000000)LF * ($wantedship.$value)LF)" reason="relationchangereason.destroyedfactionenemy" />
+                    <speak actor="player.computer" line="279" comment="Incoming funds transfer." />
+                    <transfer_money from="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner" to="faction.player" amount="(global.$HeadHunterWantedTracker.{$wantedship}.$value)Cr" /> <!-- determine here what percentage we are setting the actual reward to, or start showing the actual reward in the bounty menu and give that straight up -->
+                    <add_faction_relation faction="faction.player" otherfaction="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner" value="0.00016LF + (0.0064LF / (2000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF)" reason="relationchangereason.destroyedfactionenemy" />
                 </do_if>
                 <remove_value name="global.$HeadHunterWantedTracker.{$wantedship}" />
 
                 <!-- TODO: verify money transfer on wanted kill -->
-                <!-- TODO: gravidar event checking for updating last spotted location and audio or speak line if possible is player comes across a wanted ship -->
+                <!-- TODO: gravidar scans aren't working -->
+                <!-- TODO: player ship on wanted kill is added to the wanted list...do we want to do this right now? -->
                 <!-- TODO: change gatherallyeships interval to reasonable level -->
+                <!-- TODO: just for testing 503:X detected 279:incoming funds transfer 511:X within sensor range 513+10044: Bounty Hunter on intercept course (for player bounty thing later) 302224401:Target acquired 302224520:Proximity alert -->
                 <!-- TODO: track bounty on player.entity. Send job ships to hunt player. As bounty grows, send stronger shit -->
+            </actions>
+         </cue>
+         <cue name="ProximityThrottle" instantiate="true" checktime="player.age + 30s" checkinterval="30s" comment="Else comming across a ship, gravidar apparently ">
+         <actions>
+            <set_value name="global.$HHThrottled" exact="false" />
+         </actions>
+         </cue>
+         <cue name="WantedPlayerProximity" instantiate="true" comment="Stuff for wanted within player ship range">
+            <conditions>
+                <check_all>
+                    <event_gravidar_has_scanned group="global.$PlayerControlledGroup"/>
+                    <check_value value="event.object.sector and event.object == player.ship" />
+                    <check_value value="not @global.$HHThrottled" />
+                    <count_gravidar_contacts result="$contacts" object="event.object" min="1" multiple="true">
+                        <match_context macro="event.object.sector.macro" />
+                        <match class="class.ship" />
+                        <match shiptype="shiptype.xsdrone" negate="true" />
+                        <match shiptype="shiptype.lasertower" negate="true" />
+                        <match shiptype="shiptype.smalldrone" negate="true" />
+                    </count_gravidar_contacts>
+                </check_all>
+            </conditions>
+            <actions>
+                <do_for_each name="$contact" in="$contacts" counter="$counter">
+                    <do_if value="global.$HeadHunterWantedTracker.{$contact}? and $counter le 1" comment="So as not to spam if there is a fleet of badasses">
+                        <speak actor="player.computer" line="[2021,511]" />
+                        <show_notification text="[['Wanted Ship Nearby!\n%s %s worth %s credits'.[$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="90" />
+                        <set_value name="global.$HHThrottled" exact="true" />
+                        
+                        <break />
+                    </do_if>
+                </do_for_each>
+            </actions>
+         </cue>
+         <cue name="WantedPlayerShipsProximity" instantiate="true" comment="Stuff for wanted within player owned ships range">
+            <conditions>
+                <check_all>
+                    <event_gravidar_has_scanned group="global.$PlayerControlledGroup"/>
+                    <check_value value="event.object.sector and event.object != player.ship" />
+                    <count_gravidar_contacts result="$contacts" object="event.object" min="1" multiple="true">
+                        <match_context macro="event.object.sector.macro" />
+                        <match class="class.ship" />
+                    </count_gravidar_contacts>
+                </check_all>
+            </conditions>
+            <actions>
+                <do_for_each name="$contact" in="$contacts" counter="$counter">
+                    <do_if value="global.$HHAllWanted.indexof.{$contact} and $counter le 1" comment="same as above about badasses">
+                        <speak actor="event.object.assignedaipilot" line="10503" comment="Wingman reporting enemy activity."/>
+                        <write_to_logbook category="alerts" title="'Wanted Ship Spotted!'"
+                                    text="'Our fleet has spotted a ship with a Wanted Bounty in %s worth %s credits.'.[$contact.sector,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default]"
+                                    interaction="showonmap" object="$contact" />
+                    </do_if>
+                </do_for_each>
             </actions>
          </cue>
          </cues>

@@ -84,10 +84,6 @@
 							<create_list name="$FactionList"/>
 						</do_else>
                         <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker">
-                            <do_if value="$bleh.typeof.null">
-                                
-                                <debug_text text="'HeadHunter Board: Owner was blank. Fix as %s'" />
-                            </do_if>
                             <do_if value="not $FactionList.indexof.{$bleh.trueowner}">
                                 <append_to_list name="$FactionList" exact="$bleh.trueowner" />
                             </do_if>
@@ -179,7 +175,7 @@
                                     <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
                                         $col = 10,
                                         $colSpan = 3,
-                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner.knownname else 'Unknown' ,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner.knownname else 'Unknown' ,
                                         ]"/>
                                     <!-- Top 100 -->
                                     <do_if value="$i ge 100"><break /></do_if>
@@ -207,7 +203,7 @@
                                     <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
                                         $col = 10,
                                         $colSpan = 3,
-                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner.knownname else 'Unknown' ,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner.knownname else 'Unknown' ,
                                         ]"/>
                                     <!-- Top 100 -->
                                     <do_if value="$i ge 100"><break /></do_if>
