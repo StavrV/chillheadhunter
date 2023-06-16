@@ -71,12 +71,12 @@
 						<do_if value="$args.$echo.$refresh">
 							<signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu"/>
 						</do_if>
-                        <debug_text text="'HHBoard: Dropdown selected: %s'.[$args.$option.$value]" chance="$HHDebug" filter="scripts"/>
                         <set_value name="$SelectedFaction" exact="$args.$option.$value" />
 					</actions>
                 </cue>
                 <library name="GetFactions">
                     <actions>
+                        <!-- TODO: may not need. Think updating serial killer was blanking victim faction. <set_value name="$BaseFactionBucket" exact="[faction.argon,faction.alliance,faction.antigone,faction.hatikvah,faction.holyorder,faction.ministry,faction.paranid,faction.teladi" />-->
                         <do_if value="$FactionList?">
 							<clear_list list="$FactionList"/>
 						</do_if>
@@ -84,6 +84,10 @@
 							<create_list name="$FactionList"/>
 						</do_else>
                         <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker">
+                            <do_if value="$bleh.typeof.null">
+                                
+                                <debug_text text="'HeadHunter Board: Owner was blank. Fix as %s'" />
+                            </do_if>
                             <do_if value="not $FactionList.indexof.{$bleh.trueowner}">
                                 <append_to_list name="$FactionList" exact="$bleh.trueowner" />
                             </do_if>

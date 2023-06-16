@@ -69,7 +69,7 @@
                             <!-- Bounty Handling -->
                             <do_if value="global.$HeadHunterBountyMultiplier != 0">
                                 <set_value name="$reward" min="($enemyhealthdeath*0.3)i"
-                                    max="($enemyhealthdeath*0.7)i" />
+                                    max="($enemyhealthdeath*0.5)i" />
                                 <set_value name="$rewardmodified" exact="$reward*global.$HeadHunterBountyMultiplier" />
                                 <set_value name="$rewardCr" exact="($rewardmodified)Cr" />
                                 <debug_to_file name="'bounties'" directory="'HeadHunter'"
@@ -144,6 +144,7 @@
                         <event_object_destroyed group="global.$HHAllShips" />
                         <check_value value="not global.$HHAllWanted.indexof.{event.param}"/> <!-- if a wanted ship is killed, we don't want to add the Wanted claimer to the wanted board. They should be left in peace for a job well done! -->
                         <check_value value="event.param.isclass.ship" />
+                        <check_value value="not event.param.islasertower" />
                         <check_value value="event.object.isclass.ship"/> <!-- TODO: maybe temporary to doulecheck that victim is a ship -->
                         <check_any>
                             <check_value value="event.param.isclass.ship_s" />
@@ -155,7 +156,7 @@
                     </conditions>
                     <actions>
                         <set_value name="$victim" exact="event.object" />
-                        <do_if value="event.param.typename == 'Drone' or event.param.islasertower">
+                        <do_if value="event.param.typename == 'Drone'">
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'\n%s was the killer so setting as commander: Vic: %s %s Real Killer: %s %s'.[@event.param.typename,event.object.idcode,event.object.knownname,event.param.commander.idcode,event.param.commander.knownname]"
                             output="false" append="true" chance="100" />
@@ -173,9 +174,9 @@
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'SERIAL KILLER: Killer already on the board. Adding %s to %s'.[global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default,$victim.value.formatted.default]"
                             output="false" append="true" chance="100" />
-                            <set_value name="global.$HeadHunterWantedTracker.{$killer}.$value" exact="global.$HeadHunterWantedTracker.{$killer}.$value + $victim.value" />
-                            <!--<set_value name="$killer.pilot.$lastseen" exact="$killer.sector" />
-                            <set_value name="$killer.pilot.$lastvictim" exact="$victim" />-->
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}.$value" exact="global.$HeadHunterWantedTracker.{$killer}.$value + ($victim.value - ($victim.seed % ($victim.value / 10)))" />
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}.$lastvictim" exact="$victim" />
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}.$lastseen" exact="$killer.sector" />
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'New total is: %s'.[global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
                             output="false" append="true" chance="100" />
@@ -189,12 +190,12 @@
                             output="false" append="true" chance="100" />
                                 <break />
                             </do_if>
-                            <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = $victim.value,$lastseen = $killer.sector,$lastvictim = $victim]" />
-                            <!--<set_value name="$killer.pilot.$lastseen" exact="$killer.sector" />
-                            <set_value name="$killer.pilot.$lastvictim" exact="$victim" /> -->
+                            <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = $victim.value - ($victim.seed % ($victim.value / 10)),$lastseen = $killer.sector,$lastvictim = $victim]" />
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'NEW WANTED: Killer is brand new. Adding Killer: %s Key: %s Value: %s to the board.'.[$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$killer.knownname,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default]"
                             output="false" append="true" chance="100" />
+                            <!-- TODO: just for testing -->
+                            <speak actor="player.computer" line="279" comment="Incoming fund transfer." />
                         </do_else>
                     </actions>
             </cue>
@@ -220,18 +221,24 @@
                 <debug_to_file name="'wanted'" directory="'HeadHunter'"
                     text="'CLAIM: A Wanted ship has been destroyed in %s: %s %s that had a bounty on their head of %s'.[$claimsector,event.object.idcode,event.object.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
                     output="false" append="true" chance="100" />
-                <do_if value="global.$HeadHunterNotify">
-				    <show_notification text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]" priority="5" />
+                <do_if value="global.$HeadHunterNotify or $wantedclaimer.isplayerowned">
+				    <show_notification text="'Head Claimed! %s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]" priority="90" />
                 <write_to_logbook category="alerts"
                         title="'HEAD CLAIMED:'"
                         text="'%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
-                        interaction="showonmap" object="$wantedship" />
+                        interaction="showonmap" object="$wantedship" money="if $wantedship.isplayerowned then ($wantedship.$value)Cr else null" />
                 </do_if>
-                <remove_value name="global.$HeadHunterWantedTracker.{event.object}" />
-                <!-- TODO: add actual money transfer part and verify wantedship is removed from the bounty board -->
-                <!-- TODO: add logic to double rep gain from general bounty for wanted kill -->
+                <do_if value="$wantedclaimer.isplayerowned">
+                    <speak actor="computer" line="279" comment="Incoming fund transfer." />
+                    <transfer_money from="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner" to="faction.player" amount="($wantedship.$value)Cr" />
+                    <add_faction_relation faction="faction.player" otherfaction="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.trueowner" value="0.00016LF + (0.0064LF / (2000000)LF * ($wantedship.$value)LF)" reason="relationchangereason.destroyedfactionenemy" />
+                </do_if>
+                <remove_value name="global.$HeadHunterWantedTracker.{$wantedship}" />
+
+                <!-- TODO: verify money transfer on wanted kill -->
                 <!-- TODO: gravidar event checking for updating last spotted location and audio or speak line if possible is player comes across a wanted ship -->
                 <!-- TODO: change gatherallyeships interval to reasonable level -->
+                <!-- TODO: track bounty on player.entity. Send job ships to hunt player. As bounty grows, send stronger shit -->
             </actions>
          </cue>
          </cues>
