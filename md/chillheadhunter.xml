@@ -33,7 +33,7 @@
                             param="table[
                     $id = 'HeadHunterOptions',
                     $columns = 3, 
-                    $title = 'HeadHunter Options',
+                    $title = 'HeadHunter Settings',
                     $onOpen = HHOptsMenu
                     ]" />
                     </actions>
@@ -160,7 +160,7 @@
                     <actions>
                         <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker" >
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                            text="'(HeadHunter Table) Killer: %s %s || Running Total: %s || Last Spotted: %s || Last Victim: %s'.[global.$HeadHunterWantedTracker.{$bleh}.$killer.idcode,global.$HeadHunterWantedTracker.{$bleh}.$killer.knownname,global.$HeadHunterWantedTracker.{$bleh}.$value.formatted.default,global.$HeadHunterWantedTracker.{$bleh}.$lastseen.knownname,global.$HeadHunterWantedTracker.{$bleh}.$lastvictim.knownname]"
+                            text="'(HeadHunter Table) Killer: %s %s || Running Total: %s || Last Spotted: %s || Last Victim: %s'.[global.$HeadHunterWantedTracker.{$bleh}.$killer.idcode,global.$HeadHunterWantedTracker.{$bleh}.$killer.knownname,global.$HeadHunterWantedTracker.{$bleh}.$value.formatted.default,global.$HeadHunterWantedTracker.{$bleh}.$lastseen.knownname,global.$HeadHunterWantedTracker.{$bleh}.$lastvictimfaction.knownname]"
                             output="false" append="true" chance="100" /> <!-- TODO: change chance -->
                         </do_for_each>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />

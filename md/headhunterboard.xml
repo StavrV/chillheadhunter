@@ -17,6 +17,7 @@
 			</actions>
 		</cue>
         <cue name="HeadHunterBoardInit" instantiate="false">
+            <conditions><event_universe_generated /></conditions>
             <actions>
                 <set_value name="$HHDebug" exact="100" />
                 <include_actions ref="GetFactions" />
@@ -117,7 +118,7 @@
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
 							$col = 1,
 							$colSpan = 2,
-							$text = 'Target Faction:',
+							$text = 'Hunting Faction:',
 							]"/>
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Dropdown" param="table[
 							$col = 3, 
@@ -175,7 +176,7 @@
                                     <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
                                         $col = 10,
                                         $colSpan = 3,
-                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner.knownname else 'Unknown' ,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction.knownname else 'Unknown' ,
                                         ]"/>
                                     <!-- Top 100 -->
                                     <do_if value="$i ge 100"><break /></do_if>
@@ -203,7 +204,7 @@
                                     <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
                                         $col = 10,
                                         $colSpan = 3,
-                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictim.owner.knownname else 'Unknown' ,
+                                        $text = if global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction? then global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction.knownname else 'Unknown' ,
                                         ]"/>
                                     <!-- Top 100 -->
                                     <do_if value="$i ge 100"><break /></do_if>
