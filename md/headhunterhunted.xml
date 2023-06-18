@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="HeadHunterHunted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+    <!-- Notepad
+        Set to patrol to player last known area
+        gravidar scans against head hunter tracker board for faction.player ships
+        attack if found. maybe coordinated attack with auto release, or without if ship.isclass.class_l/xl
+        Interval to check to spawn these guys with chance base.
+        Pick from list of faction that have hunters. Split/Paranid/Teladi at least 
+        Have a timeout where they eventually call move.die so we don't have a build up
+        Should judge bounty amount and send bigger fleet for higher bounty
+     -->
+    <cues>
+        <cue name="Init">
+        <conditions>
+            <event_universe_generated />
+            <!-- check that option is enabled for these guys -->
+        </conditions>
+        <actions>
+            <set_value name="$HuntedDebug" exact="100" />
+            <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                text="'Init Hunted: On the prowl for profitsss'"
+                output="false" append="false" chance="$HuntedDebug" />
+        </actions>
+            <cues>
+                <cue name="HunterTimer" instantiate="true" checkinterval="10s" checktime="player.age + 10s">
+                <actions>
+                    <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                        text="'HunerTimer firing...'"
+                        output="false" append="true" chance="Init.$HuntedDebug" />
+                    <signal_cue_instantly cue="SpawnHunter" chance="100" />
+                </actions>
+            </cue>
+                <cue name="SpawnHunter">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <create_ship>
+
+                        </create_ship>
+                        
+                    </actions>
+                </cue>
+            </cues>
+        </cue>
+    </cues>
+</mdscript>

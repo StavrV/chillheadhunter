@@ -9,13 +9,15 @@
                 <debug_text text="'HeadHunter setup check...'" filter="scripts" />
 				<do_if value="not global.$HeadHunterWantedTracker?">
 					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" />
-                    <set_value name="global.$HeadHunterNotify" exact="true" />
+                    <set_value name="global.$HeadHunterNPCNotify" exact="true" />
+                    <set_value name="global.$HeadHunterProximityNotify" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
-                    <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
+                    <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNPCNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNPCNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
                 <do_else>
                     <debug_text text="'HeadHunter Wanted Board was ready.'" filter="scripts" />
                 </do_else>
+                <show_help color="[179,102,255,255]" duration="12s" halign="'center'" position="1" custom="'Head Hunter Mod Installed: This is the way'" />
 			</actions>
 		</cue>
         <cue name="HHOptsInit" instantiate="false">
@@ -48,16 +50,16 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Global Wanted Claim Notifications',
-								$mouseOverText= 'Receive notifications and logbook for Galaxy-wide Wanted claims. Disabled is only player.',
+								$text = 'NPC Wanted Claim Notifications',
+								$mouseOverText= 'Receive notifications for NPCs claiming Wanted bounties.',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterNotify == true then 'Enabled' else 'Disabled', 
-								  $color  =  if global.$HeadHunterNotify == true then 'Helper.color.green' else 'Helper.color.red',
+								  $text   =  if global.$HeadHunterNPCNotify == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterNPCNotify == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
 								$onClick = HHNotifyToggle,
@@ -67,9 +69,29 @@
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                             param="table[
 								$col = 1,
+								$colSpan = 2,
+								$text = 'AI Ship Proximity Notifications',
+								$mouseOverText= 'Enables notifications when player AI ships spot a wanted ship.',
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 3, 
+								$colSpan = 1,
+								$text = table[
+								  $text   =  if global.$HeadHunterProximityNotify == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterProximityNotify == true then 'Helper.color.green' else 'Helper.color.red',
+								  $halign = 'center',
+								],
+								$onClick = ProximityNotifyToggle,
+								$onRightClick = ProximityNotifyToggle,
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
 								$colSpan = 1,
 								$text = 'General Bounty Multiplier',
-								$mouseOverText= '1.0x is mod default',
+								$mouseOverText= 'Affects non-Wanted bounties only. 1.0x is mod default',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider" 
                             param="table[
@@ -82,7 +104,17 @@
                                 $step = 0.1,
                                 $onSliderCellConfirm = HHBountyMultiplierConfirm,
                             ]" />
-                            <!-- TODO: Temp for debug -->
+                            <!-- Debug -->
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                                param="table[
+                                    $col = 1,
+                                    $colSpan = 2,
+                                    $text = 'Debug Stuff',
+                                ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                                 param="table[
@@ -103,7 +135,7 @@
                                     $onClick = ClearWantedBoard,
                                     $onRightClick = ClearWantedBoard,
                                 ]" />
-                            <!-- TODO: Temp for debug -->
+                            <!-- for debug menu -->
                             <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                                 param="table[
@@ -137,8 +169,18 @@
                         <event_cue_signalled />
                     </conditions>
                     <actions>
-                        <set_value name="global.$HeadHunterNotify"
-                            exact="if global.$HeadHunterNotify == true then false else true" />
+                        <set_value name="global.$HeadHunterNPCNotify"
+                            exact="if global.$HeadHunterNPCNotify == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="ProximityNotifyToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterProximityNotify"
+                            exact="if global.$HeadHunterProximityNotify == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>
                 </cue>
@@ -161,7 +203,12 @@
                         <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker" >
                             <debug_to_file name="'wanted'" directory="'HeadHunter'"
                             text="'(HeadHunter Table) Killer: %s %s || Running Total: %s || Last Spotted: %s || Last Victim: %s'.[global.$HeadHunterWantedTracker.{$bleh}.$killer.idcode,global.$HeadHunterWantedTracker.{$bleh}.$killer.knownname,global.$HeadHunterWantedTracker.{$bleh}.$value.formatted.default,global.$HeadHunterWantedTracker.{$bleh}.$lastseen.knownname,global.$HeadHunterWantedTracker.{$bleh}.$lastvictimfaction.knownname]"
-                            output="false" append="true" chance="100" /> <!-- TODO: change chance -->
+                            output="false" append="true" chance="100" /> 
+                        </do_for_each>
+                        <do_for_each name="$bleh" in="global.$HHAllWanted" >
+                            <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                            text="'(HHAllWanted) Killer: %s %s'.[$bleh.idcode,$bleh.knownname]"
+                            output="false" append="true" chance="100" />
                         </do_for_each>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>

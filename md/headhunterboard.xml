@@ -19,7 +19,7 @@
         <cue name="HeadHunterBoardInit" instantiate="false">
             <conditions><event_universe_generated /></conditions>
             <actions>
-                <set_value name="$HHDebug" exact="100" />
+                <set_value name="$HHDebug" exact="0" />
                 <include_actions ref="GetFactions" />
             </actions>
             <cues>
@@ -77,7 +77,6 @@
                 </cue>
                 <library name="GetFactions">
                     <actions>
-                        <!-- TODO: may not need. Think updating serial killer was blanking victim faction. <set_value name="$BaseFactionBucket" exact="[faction.argon,faction.alliance,faction.antigone,faction.hatikvah,faction.holyorder,faction.ministry,faction.paranid,faction.teladi" />-->
                         <do_if value="$FactionList?">
 							<clear_list list="$FactionList"/>
 						</do_if>
@@ -91,7 +90,6 @@
                         </do_for_each>
                         <sort_list list="$FactionList" sortbyvalue="loop.element.knownname"/>
                         <set_value name="$FactionList.{1}" exact="'All'" operation="insert" />
-                        <debug_text text="'HeadHunter Board: Factions loaded to $FactionList'" filter="scripts" chance="$HHDebug" />
                     </actions>
                 </library>
                 <!-- Much of this faction dropdown menu library is by DeadAir with permission because I was too dumb to figure out "Simple" Menu dropdown callbacks -->
@@ -117,14 +115,14 @@
 						<signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
 							$col = 1,
-							$colSpan = 2,
-							$text = 'Hunting Faction:',
+							$colSpan = 3,
+							$text = 'Wanted Faction:',
 							]"/>
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Dropdown" param="table[
-							$col = 3, 
+							$col = 4, 
 							$options = $options_list,
 							$startOption = $dropdown_index,
-							$colSpan = 4,
+							$colSpan = 5,
 							$onDropDownConfirmed = FactionSelected,
 							$echo = table[
 								$type  = 'dropdown',
@@ -134,8 +132,8 @@
 							]"/>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
-								$col = 7, 
-								$colSpan = 2,
+								$col = 9, 
+								$colSpan = 4,
 								$text = table[
 								  $text   =  if global.$HHSortValue == true then 'By Value' else 'By Distance', 
 								  $color  =  if global.$HHSortValue == true then 'Helper.color.green' else 'Helper.color.blue',
