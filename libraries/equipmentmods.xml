@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+    <add sel="//equipmentmods/ship">
+        <radarrange ware="mod_ship_radarrange_01_mk1_headhunter" quality="2" min="1.45" max="1.45"/>
+    </add>
+</diff>

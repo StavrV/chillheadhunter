@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+<add sel="//wares">
+    <ware id="mod_ship_radarrange_01_mk1_headhunter" name="HeadHunter Radar Mod" description="A radar boosting mod only available to bounty hunters" shortname="HeadHunter Radar Mod" transport="inventory" volume="1" tags="crafting equipmentmod noplayerblueprint">
+    <price min="1" average="1" max="1" />
+    <production time="10" amount="1" method="default" name="{20206,101}">
+      <primary>
+        <ware ware="modpart_shipnanoweave_t1" amount="1" />
+      </primary>
+    </production>
+  </ware>
+  </add>
+</diff>

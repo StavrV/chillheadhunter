@@ -11,6 +11,8 @@
 					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" />
                     <set_value name="global.$HeadHunterNPCNotify" exact="true" />
                     <set_value name="global.$HeadHunterProximityNotify" exact="true" />
+                    <set_value name="global.$HeadHunterPlayerMapTag" exact="true" />
+                    <set_value name="global.$HeadHunterHuntersEnabled" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
                     <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNPCNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNPCNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
@@ -84,6 +86,46 @@
 								],
 								$onClick = ProximityNotifyToggle,
 								$onRightClick = ProximityNotifyToggle,
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
+								$colSpan = 2,
+								$text = 'Player Wanted Ship Map Markers',
+								$mouseOverText= 'Show Wanted tags on the map for player ships',
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 3, 
+								$colSpan = 1,
+								$text = table[
+								  $text   =  if global.$HeadHunterPlayerMapTag == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterPlayerMapTag == true then 'Helper.color.green' else 'Helper.color.red',
+								  $halign = 'center',
+								],
+								$onClick = PlayerMapTagToggle,
+								$onRightClick = PlayerMapTagToggle,
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
+								$colSpan = 2,
+								$text = 'Player Head Hunters',
+								$mouseOverText= 'Bounty hunters may occasionally hunt you :)',
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 3, 
+								$colSpan = 1,
+								$text = table[
+								  $text   =  if global.$HeadHunterHuntersEnabled == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterHuntersEnabled == true then 'Helper.color.green' else 'Helper.color.red',
+								  $halign = 'center',
+								],
+								$onClick = HuntersToggle,
+								$onRightClick = HuntersToggle,
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
@@ -181,6 +223,26 @@
                     <actions>
                         <set_value name="global.$HeadHunterProximityNotify"
                             exact="if global.$HeadHunterProximityNotify == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="PlayerMapTagToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterPlayerMapTag"
+                            exact="if global.$HeadHunterPlayerMapTag == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="HuntersToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterHuntersEnabled"
+                            exact="if global.$HeadHunterHuntersEnabled == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>
                 </cue>

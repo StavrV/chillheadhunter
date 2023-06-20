@@ -1,44 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="HeadHunterHunted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <!-- Notepad
-        Set to patrol to player last known area
-        gravidar scans against head hunter tracker board for faction.player ships
-        attack if found. maybe coordinated attack with auto release, or without if ship.isclass.class_l/xl
         Interval to check to spawn these guys with chance base.
-        Pick from list of faction that have hunters. Split/Paranid/Teladi at least 
-        Have a timeout where they eventually call move.die so we don't have a build up
-        Should judge bounty amount and send bigger fleet for higher bounty
      -->
     <cues>
         <cue name="Init">
         <conditions>
             <event_universe_generated />
-            <!-- check that option is enabled for these guys -->
         </conditions>
         <actions>
-            <set_value name="$HuntedDebug" exact="100" />
+            <set_value name="$HuntedDebug" exact="0" />
             <debug_to_file name="'hunted'" directory="'HeadHunter'"
                 text="'Init Hunted: On the prowl for profitsss'"
                 output="false" append="false" chance="$HuntedDebug" />
+            <create_group groupname="global.$HHHunters" />
         </actions>
             <cues>
-                <cue name="HunterTimer" instantiate="true" checkinterval="10s" checktime="player.age + 10s">
+                <cue name="HunterTimer" instantiate="true" checkinterval="10min" checktime="player.age + 30s">
+                <conditions>
+                    <check_value value="global.$HeadHunterHuntersEnabled" />
+                    <check_value value="global.$HHAllPlayerWanted.count gt 0" />
+                </conditions>
                 <actions>
                     <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                        text="'HunerTimer firing...'"
+                        text="'Head Hunters eligible. HunterTimer firing...'"
                         output="false" append="true" chance="Init.$HuntedDebug" />
-                    <signal_cue_instantly cue="SpawnHunter" chance="100" />
+                    <sort_group group="global.$HHAllPlayerWanted" sortbyvalue="loop.element.value" sortdescending="true" />
+                    <set_value name="$playertarget" exact="global.$HHAllPlayerWanted.{1}" />
+                    <do_if value="global.$HHHunters.count gt 0" comment="Orphan check">
+                        <do_for_each name="$timecheckedship" in="global.$HHHunters">
+                            <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'%s %s in %s \nSpawntime: %s player.age: %s'.[$timecheckedship.idcode,$timecheckedship.knownname,$timecheckedship.sector.knownname,$timecheckedship.spawntime,player.age]" output="false" append="true" chance="Init.$HuntedDebug" />
+                            <do_if value="$timecheckedship.pilot == null">
+                                <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Head Hunter pilot was missing. Cleaning up.'" output="false" append="true" chance="Init.$HuntedDebug" />
+                                <destroy_group group="global.$HHHunters" />
+                            </do_if>
+                            <do_if value="player.age-$timecheckedship.spawntime ge 45min" >
+                                <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Head Hunter got lost in the sauce for too long. Cleaning up.'" output="false" append="true" chance="Init.$HuntedDebug" />
+                                <destroy_group group="global.$HHHunters" />
+                            </do_if>
+                        </do_for_each>
+                    </do_if>
+                    <signal_cue_instantly cue="SpawnHunters" chance="25" />
                 </actions>
             </cue>
-                <cue name="SpawnHunter">
+                <cue name="SpawnHunters" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                        <check_value value="global.$HHHunters.count == 0" />
+                    </conditions>
+                    <actions>  
+                        <!-- determine size of hunter fleet needed -->
+                        <set_value name="$Difficulty" exact="1" /> <!-- 0-3, 0 has no modified radar -->
+                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                        text="'SpawnHunters firing...'"
+                        output="false" append="true" chance="Init.$HuntedDebug" />
+                        <set_value name="$SendingFaction" list="[faction.argon,faction.antigone,faction.teladi,faction.paranid]" />
+                        <set_value name="$countS" exact="0" />
+                        <set_value name="$countM" exact="0" />
+                        <set_value name="$countL" exact="0" />
+                        <set_value name="$countXL" exact="0" />
+
+                        <find_gravidar_contact name="$supportingtargets" object="$playertarget" class="[class.ship]" functional="true" owner="faction.player" multiple="true">
+                            <match_context macro="$playertarget.sector.macro" />
+                            <match class="class.buildstorage" negate="true" />
+                            <match shiptype="shiptype.xsdrone" negate="true" />
+                            <match shiptype="shiptype.escapepod" negate="true" />
+                            <match shiptype="shiptype.distressdrone" negate="true" />
+                            <match shiptype="shiptype.lasertower" negate="true" />
+                            <match shiptype="shiptype.smalldrone" negate="true" />
+                            <match_distance max="$playertarget.maxradarrange" object="$playertarget" />
+                        </find_gravidar_contact>
+                        <!-- Lump the scope target in with the rest of the hostiles group -->
+                        <append_to_list name="$supportingtargets" exact="$playertarget" />
+                        <do_all exact="$supportingtargets.count" counter="$c">
+                            <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                                text="'Sizing potential player support - Count Number: %s Name: %s Type: %s'.[$c,$supportingtargets.{$c}.knownname,@$supportingtargets.{$c}.type]"
+                                output="false" append="true" chance="Init.$HuntedDebug" />
+                        </do_all>
+                        <!-- Filter out what sizes are in the group -->
+                        <do_all exact="$supportingtargets.count" counter="$i">
+                            <do_if value="$supportingtargets.{$i}.isclass.ship_s">
+                                <set_value name="$countS" exact="$countS + 1" />
+                            </do_if>
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_m">
+                                <set_value name="$countM" exact="$countM + 1" />
+                            </do_elseif>
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_l">
+                                <set_value name="$countL" exact="$countL + 1" />
+                            </do_elseif>
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_xl"> 
+                                <set_value name="$countXL" exact="$countL + 3" /> <!-- Bounty hunters probably not rolling carriers but we'll roll 3 DD for each -->
+                            </do_elseif>
+                        </do_all>
+                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                                text="'Final count: S:%s M:%s L:%s XL:%s'.[$countS,$countM,$countL,$countXL]"
+                                output="false" append="true" chance="Init.$HuntedDebug" />
+                        <do_if value="(global.$HeadHunterWantedTracker.{$playertarget}.$value/100 gt 1000000) and (global.$HeadHunterWantedTracker.{$playertarget}.$value/100 le 5000000)" >
+                            <set_value name="$Difficulty" exact="2" />
+                        </do_if>
+                        <do_if value="(global.$HeadHunterWantedTracker.{$playertarget}.$value/100 gt 5000000)" >
+                            <set_value name="$Difficulty" exact="3" />
+                        </do_if>
+                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                                text="'Difficulty: %s'.[$Difficulty]"
+                                output="false" append="true" chance="Init.$HuntedDebug" />
+
+                        <set_value name="$NumberS" exact="$countS" /> <!-- maybe a small random range -->
+                        <set_value name="$NumberM" exact="$countM" />
+                        <set_value name="$NumberL" exact="$countL" />
+                        <set_value name="$NumberXL" exact="$countXL" />
+                    </actions>
+                    <cues>
+                        <cue name="CreateHuntersS" ref="md.LIB_Create_Ships.Start"  >
+                            <param name="EndSignalCue" value="HuntersCreated" />
+                            <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
+                            <param name="Ship_Amount" value="$NumberS" />
+                            <param name="Ship_Faction" value="$SendingFaction" />
+                            <param name="Ship_CategoryFaction" value="$SendingFaction" />
+                            <param name="Ship_Category_Size" value="class.ship_s" />
+                            <param name="Ship_Class" value="class.ship_s" />
+                            <param name="Ship_CategoryTags" value="tag.military" />
+                            <param name="Sector" value="$SendingFaction.headquarters.sector" />
+                            <param name="Position" value="position.[0,0,0]" />
+                            <param name="AllowBoostingIn" value="true" />
+                            <param name="DebugChance" value="0" />
+                        </cue>
+                        <cue name="CreateHuntersM" ref="md.LIB_Create_Ships.Start"  >
+                            <param name="EndSignalCue" value="HuntersCreated" />
+                            <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
+                            <param name="Ship_Amount" value="$NumberM" />
+                            <param name="Ship_Faction" value="$SendingFaction" />
+                            <param name="Ship_CategoryFaction" value="$SendingFaction" />
+                            <param name="Ship_Category_Size" value="class.ship_m" />
+                            <param name="Ship_Class" value="class.ship_m" />
+                            <param name="Ship_CategoryTags" value="tag.military" />
+                            <param name="Sector" value="$SendingFaction.headquarters.sector" />
+                            <param name="Position" value="position.[0,0,0]" />
+                            <param name="AllowBoostingIn" value="true" />
+                            <param name="DebugChance" value="0" />
+                        </cue>
+                        <cue name="CreateHuntersL" ref="md.LIB_Create_Ships.Start"  >
+                            <param name="EndSignalCue" value="HuntersCreated" />
+                            <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
+                            <param name="Ship_Amount" value="$NumberL" />
+                            <param name="Ship_Faction" value="$SendingFaction" />
+                            <param name="Ship_CategoryFaction" value="$SendingFaction" />
+                            <param name="Ship_Category_Size" value="class.ship_l" />
+                            <param name="Ship_Class" value="class.ship_l" />
+                            <param name="Ship_CategoryTags" value="tag.military" />
+                            <param name="Sector" value="$SendingFaction.headquarters.sector" />
+                            <param name="Position" value="position.[0,0,0]" />
+                            <param name="AllowBoostingIn" value="true" />
+                            <param name="DebugChance" value="0" />
+                        </cue>
+                    </cues>
+                </cue>
+                <cue name="HuntersCreated">
                     <conditions>
                         <event_cue_signalled />
                     </conditions>
                     <actions>
-                        <create_ship>
-
-                        </create_ship>
-                        
+                        <create_ship ><owner></owner></create_ship>
+                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
+                        text="'Hunters are alive! Maybe...Count: %s'.[this.$LIB_Create_Ships_Result.count]"
+                        output="false" append="true" chance="Init.$HuntedDebug" />
+                        <do_for_each name="$hunter" in="this.$LIB_Create_Ships_Result" > 
+                            <set_owner object="$hunter" faction="faction.ownerless" />
+                            <set_object_name object="$hunter" name="$SendingFaction.shortname+' '+$hunter.knownname" />
+                            <add_paint_mod object="$hunter" ware="ware.paintmod_0024" />
+                            <set_object_capturable object="$hunter" capturable="false" />
+                            <do_if value="$Difficulty == 1">
+                                <add_equipment_mods object="$hunter">
+                                    <mods list="[ware.mod_ship_radarrange_01_mk1_headhunter,ware.mod_shield_rechargedelay_01_mk1,ware.mod_engine_travelthrust_01_mk3,ware.mod_weapon_damage_01_mk1]" />
+                                </add_equipment_mods>
+                            </do_if>
+                            <do_if value="$Difficulty == 2">
+                                <add_equipment_mods object="$hunter">
+                                    <mods list="[ware.mod_ship_radarrange_01_mk1_headhunter,ware.mod_shield_capacity_01_mk2,ware.mod_engine_travelthrust_01_mk3,ware.mod_weapon_damage_04_mk2]" />
+                                </add_equipment_mods>
+                            </do_if>
+                            <do_if value="$Difficulty == 3">
+                                <add_equipment_mods object="$hunter">
+                                    <mods list="[ware.mod_ship_radarrange_01_mk1_headhunter,ware.mod_shield_capacity_02_mk3,ware.mod_engine_travelthrust_01_mk3,ware.mod_weapon_damage_02_mk3]" />
+                                </add_equipment_mods>
+                            </do_if>
+                            <add_to_group groupname="global.$HHHunters" object="$hunter" />
+                        </do_for_each>
+                        <sort_group group="global.$HHHunters" sortbyvalue="loop.element.value" sortdescending="true"/>
+                        <do_for_each name="$hunter" in="global.$HHHunters" counter="$count">
+                            <do_if value="$count gt 1">
+                                <set_object_commander object="$hunter" commander="global.$HHHunters.{1}" assignment="assignment.attack" />
+                            </do_if>
+                        </do_for_each>
+                    <remove_value name="this.$LIB_Create_Ships_Result" />
+                    <create_order object="global.$HHHunters.{1}" id="'HeadHunter'" default="true" >
+                        <param name="target" value="$playertarget" />
+                        <param name="destination" value="$playertarget.sector" />
+                    </create_order>
+                    <reset_cue cue="this" />
                     </actions>
                 </cue>
             </cues>

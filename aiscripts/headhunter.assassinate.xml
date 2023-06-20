@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="headhunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" >
+	<order id="HeadHunter" name="Head Hunter Assassinate"
+		description="AI only order for head hunters v. player" category="internal" infinite="true"
+		allowinloop="false">
+		<params>
+			<param name="target" default="null" type="object" text="Target" />
+			<param name="destination" default="null" type="sector" text="Destination Sector" />
+			<param name="timetocamp" default="20min" type="time" text="Camping Time"
+				comment="Time in minutes to search target sector. This is also the overall lifetime of the hunter group before expiring."/>
+			<param name="searchingstart" type="internal" default="null"
+				comment="Time we started searching at" />
+			<param name="lastrepaircheck" type="internal" default="player.age" />
+		</params>
+		<requires>
+			<match shiptype="shiptype.lasertower" negate="true" />
+		</requires>
+	</order>
+	<interrupts>
+		<handler ref="ResupplyHandler" />
+		<handler ref="TargetInvalidHandler" />
+		<handler ref="TideHandler" />
+		<handler ref="AttackHandler" />
+		<handler ref="MissileLockHandler" />
+		<handler>
+			<conditions>
+				<event_gravidar_has_scanned object="this.assignedcontrolled"/>
+                <check_value value="event.object.sector" />
+                <count_gravidar_contacts result="$contacts" object="event.object" min="1" multiple="true" >
+                    <match_context macro="event.object.sector.macro" />
+                    <match class="class.ship" />
+                    <match shiptype="shiptype.xsdrone" negate="true" />
+                    <match shiptype="shiptype.lasertower" negate="true" />
+                    <match shiptype="shiptype.smalldrone" negate="true" />
+					<match owner="faction.player" />
+                </count_gravidar_contacts>
+			</conditions>
+			<actions>
+				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'$contacts count: %s, Current location: %s'.[$contacts.count,this.assignedcontrolled.sector.knownname]" output="false" append="true" chance="0" />
+				<do_for_each name="$contact" in="$contacts">
+                    <do_if value="global.$HHAllWanted.indexof.{$contact}">
+						<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'SPOTTED wanted player!!'" output="false" append="true" chance="0" />
+						<do_if value="global.$PlayerShipsGroup.indexof.{$contact}">
+							<speak actor="player.computer" line="[2021,513]" priority="90"/>
+						</do_if>
+						<set_object_name object="this.assignedcontrolled" name="this.assignedcontrolled.knownname+' Head Hunter'" />
+						<do_if value="this.assignedcontrolled.subordinates.count">
+							<do_all exact="this.assignedcontrolled.subordinates.count" counter="$i">
+								<set_object_name object="this.assignedcontrolled.subordinates.{$i}" name="this.assignedcontrolled.subordinates.{$i}.knownname+' Head Hunter'" />
+							</do_all>
+						</do_if>
+						<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
+							<param name="primarytarget" value="$contact" />
+							<param name="pursuetargets" value="true" />
+							<param name="pursuedistance" value="1000km" />
+							<param name="allowothertargets" value="false" />
+							<param name="squad_attack" value="true" />
+							<param name="escort" value="$contact" />
+							<param name="checkrelation" value="false" />
+							<param name="debugchance" value="0" />
+						</create_order>
+                    </do_if>
+                </do_for_each>
+			</actions>
+		</handler>
+		<handler> <!--event: target destroyed, no other wanted in sight -->
+			<conditions>
+				<event_object_destroyed object="$target"/>
+				<check_value value="event.object.owner" exact="faction.player" />
+			</conditions>
+			<actions>
+				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Leaders target died. Cancel hostiles'" output="false" append="true" chance="0" />
+				<do_for_each name="$hunter" in="global.$HHHunters">
+					<do_if value="$hunter.hasrelation.enemy.{faction.player}">
+						<reset_relation_boost object="$hunter" faction="faction.player"/>
+						<set_tolerance_boost delay="30s" decay="1" value="1" object="$hunter" faction="faction.player" />
+						<cease_fire object="$hunter"/>
+						<do_if value="$hunter.isclass.[class.ship_l, class.ship_xl] and $hunter.defencenpc.exists">
+							<signal_objects object="$hunter.defencenpc" param="'stop attack'"/>
+						</do_if>
+                  </do_if>
+				</do_for_each>
+			</actions>
+		</handler>
+		<handler>
+			<conditions>
+				<check_all>
+					<event_object_changed_sector object="$target" check="false"/>
+				</check_all>
+			</conditions>
+			<actions>
+				<edit_order_param order="this.assignedcontrolled.defaultorder" param="'destination'" value="event.param" />
+				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Target was spotted passing gate sensors into %s'.[event.param.knownname]" output="false" append="true" chance="0" />
+			</actions>
+		</handler>
+		<!--<handler comment="take up the mantle">
+		<conditions>
+			<check_any>
+				<event_object_destroyed object="this.assignedcontrolled" check="false"/>
+				<event_object_abandoned object="this.assignedcontrolled" check="false"/>
+			</check_any>
+		</conditions>
+		<actions>
+			<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Commander ded.'" output="false" append="true" chance="100" />
+			<create_order object="this" id="'HeadHunter'" default="true" >
+                <param name="target" value="$target" />
+                <param name="destination" value="$destination" />
+            </create_order>
+		</actions>
+		</handler> -->
+	</interrupts>
+	<init>
+		<!-- Debug & Init -->
+		<set_value name="$HunterAIDebug" exact="100" />
+		<set_value name="$searching" exact="false" />
+		<set_value name="$findcamping" exact="false" />
+		<debug_to_file name="'hunted'" directory="'HeadHunter'"
+			text="'INIT: Assassinate AI order - Starting Log File'" output="false" append="true"
+			chance="$HunterAIDebug" />
+	</init>
+	<attention min="unknown">
+		<actions>
+			<set_command_action commandaction="commandaction.flying" />
+			<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Searching for bounty target: Age: %s'.[player.age,$target.knownname]"
+				output="false" append="true" chance="$HunterAIDebug" />
+			<label name="fromthetop" />
+			<wait exact="5s"/>
+
+			<!-- Travel logic -->
+			<do_if value="$destination != null and this.sector != $destination">
+				<move_to object="this.ship" destination="$destination" abortpath="true"
+						uselocalhighways="if this.assignedcontrolled.iscapitalship then false else true" boost="false" travel="true" >
+				</move_to>
+			</do_if>
+			<do_if value="this.sector == $destination"> <!-- we arrived in the destination sector. Setup camp. -->
+					<set_value name="$searching" exact="true" />
+					<set_value name="$findcamping" exact="true" />
+					<resume label="camp" />
+				</do_if>
+	
+			<!-- Searching logic -->
+			<label name="camp" />
+			<do_if value="$searching == true and $findcamping == true">
+				<set_value name="$findcamping" exact="false" />
+				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Starting sector search...Starting mission timer: %s'.[player.age]" output="false" append="true" chance="$HunterAIDebug" />
+				<do_if value="$searchingstart == null">
+					<edit_order_param order="this.assignedcontrolled.defaultorder"
+						param="'searchingstart'" value="player.age" />
+				</do_if>
+				<find_zone name="$campingspots" space="this.sector" normalzone="true"
+					multiple="true" append="true" />
+				<find_gate name="$campingspots" space="this.sector" multiple="true" append="true" />
+				<find_station name="$campingspots" space="this.sector" multiple="true" append="true" >
+					<match_relation_to relation="neutral" comparison="ge" object="this.assignedcontrolled"/>
+				</find_station>
+				<do_if value="$campingspots.count == 0 or null">
+					<debug_text
+						text="'HeadHunter AI Brain - targetpos was null. Sector: %s, CampingSpots var: %s '.[this.sector.knownname,$campingspots]"
+						filter="error" chance= "$HunterAIDebug"/>
+				</do_if>
+				<do_else>
+					<set_value name="$targetpos" list="$campingspots" />
+				</do_else>
+				<do_if value="$targetpos == null"> <!-- something wonky -->
+					<debug_text
+						text="'HeadHunter AI Brain - Stuck in camp because something was wonky. Go to start.'"
+						filter="error" chance="$HunterAIDebug" />
+					<resume label="fromthetop" />
+				</do_if>
+				<debug_to_file name="'hunted'" directory="'HeadHunter'"
+					text="'AI Brain - Spots in this sector: %s. Picked: %s'.[$campingspots.count,$targetpos.class]"
+					output="false" append="true" chance="$HunterAIDebug" />
+				<move_to object="this.ship" destination="$targetpos" abortpath="true"
+					uselocalhighways="if this.assignedcontrolled.iscapitalship then false else true" boost="false" travel="true">
+				</move_to>
+			</do_if>
+			<do_if value="$searching == true and $findcamping == false and this.ship.speed le 0">
+				<debug_to_file name="'hunted'" directory="'HeadHunter'"
+					text="'AI Brain - Moving to next camping spot...'" output="false"
+					append="true" chance="$HunterAIDebug" />
+				<set_value name="$targetpos" list="$campingspots" />
+				<move_to object="this.ship" destination="$targetpos" abortpath="true"
+					uselocalhighways="if this.assignedcontrolled.iscapitalship then false else true" boost="false" travel="true">
+				</move_to>
+			</do_if>
+			<!-- Mission timeout. Try random neighbor sector or die -->
+			<do_if value="$searching == true and (player.age gt $searchingstart + $timetocamp)">
+				<debug_to_file name="'hunted'" directory="'HeadHunter'"
+					text="'AI Brain - Search mission failed. Search another sector or die? playerAge is: %s and searchingstart is %s'.[player.age,$searchingstart]"
+					output="false" append="true" chance="$HunterAIDebug" />
+				<do_if value="this.assignedcontrolled.subordinates.count">
+						<do_all exact="this.assignedcontrolled.subordinates.count" counter="$rc">
+							<do_if value="this.assignedcontrolled.subordinates.{$rc}.typename != 'Drone' and this.assignedcontrolled.subordinates.{$rc}.dockslot">
+								<create_order object="this.assignedcontrolled.subordinates.{$rc}" id="'MoveDie'" immediate="true" >
+									<param name="debugchance" value="100" />
+								</create_order>
+							</do_if>
+						</do_all>
+					</do_if>
+				<create_order object="this.assignedcontrolled" id="'MoveDie'" immediate="true" >
+					<param name="debugchance" value="100" />
+				</create_order>
+			</do_if>
+
+			<label name="repaircheck"/>
+			<do_if value="player.age - $lastrepaircheck ge 300s">
+					<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Running repair/resupply checks on the fleet.'" output="false" append="true" chance="$HunterAIDebug" />
+					<set_value name="$lastrepaircheck" exact="player.age" />
+					<do_if value="this.assignedcontrolled.subordinates.count">
+						<do_all exact="this.assignedcontrolled.subordinates.count" counter="$rc">
+							<do_if value="this.assignedcontrolled.subordinates.{$rc}.typename != 'Drone' and this.assignedcontrolled.subordinates.{$rc}.dockslot">
+								<create_order object="this.assignedcontrolled.subordinates.{$rc}" id="'Resupply'" immediate="true" >
+									<param name="hullpercent" value="100" />
+									<param name="urgent" value="false" />
+									<param name="onlyuseresupplierships" value="false" />
+									<param name="resupply_units" value="false" />
+									<param name="debugchance" value="0" />
+								</create_order>
+							</do_if>
+						</do_all>
+					</do_if>
+					<create_order object="this.ship" id="'Resupply'" immediate="true" >
+						<param name="hullpercent" value="100" />
+						<param name="urgent" value="false" />
+						<param name="onlyuseresupplierships" value="false" />
+						<param name="resupply_units" value="false" />
+						<param name="debugchance" value="0" />
+					</create_order>
+			</do_if>
+			<resume label="fromthetop" />
+			<set_order_syncpoint_reached order="this.ship.order" />
+		</actions>
+	</attention>
+</aiscript>

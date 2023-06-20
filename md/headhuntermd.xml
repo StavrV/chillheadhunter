@@ -111,6 +111,7 @@
         <actions>
             <create_group groupname="global.$HHAllShips" />
             <create_group groupname="global.$HHAllWanted" />
+            <create_group groupname="global.$HHAllPlayerWanted" />
             <find_ship_by_true_owner groupname="global.$HHAllPlayerOwnedShips" faction="faction.player" space="player.galaxy" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" multiple="true" >
                 <match shiptype="shiptype.xsdrone" negate="true" />
                 <match shiptype="shiptype.escapepod" negate="true" />
@@ -151,14 +152,20 @@
                             <add_to_group groupname="global.$HHAllWanted" object="$wantedshipship" />
                         </do_if>
                     </do_for_each>
+                    <clear_group group="global.$HHAllPlayerWanted" />
+                    <do_for_each name="$playership" in="global.$HeadHunterWantedTracker">
+                        <do_if value="$playership.exists and $playership.owner == faction.player">
+                            <add_to_group groupname="global.$HHAllPlayerWanted" object="$playership" />
+                        </do_if>
+                    </do_for_each>
                     <reset_cue cue="WantedClaimTracker" />
                     <reset_cue cue="WantedDestructionTracker" />
-                   <!-- <debug_to_file name="'general'" directory="'HeadHunter'"
-                        text="'Gathered all ye olde ships! Total watching: %s Total Wanted: %s'.[global.$HHAllShips.count,global.$HHAllWanted.count]"
+                   <debug_to_file name="'general'" directory="'HeadHunter'"
+                        text="'Gathered all ye olde ships! Total watching: %s Total Wanted: %s Total Player Wanted: %s'.[global.$HHAllShips.count,global.$HHAllWanted.count,global.$HHAllPlayerWanted.count]"
                         output="false" append="true" chance="0" />
                     <debug_to_file name="'general'" directory="'HeadHunter'"
                         text="'Cue States - Destruction: %s WantedClaim: %s Payout: %s Speaky: %s'.[WantedDestructionTracker.state,WantedClaimTracker.state,PayoutEffect.state,Speaky.state]"
-                        output="false" append="true" chance="0" /> -->
+                        output="false" append="true" chance="0" />
                 </actions>
             </cue>
             <cue name="WantedDestructionTracker" instantiate="true" >
@@ -171,7 +178,7 @@
                     <check_value value="event.object.isclass.ship" />
                     <check_value value="event.object.trueowner?" />
                     <check_value value="event.object.value?" />
-                    <check_value value="not event.param.isplayerowned" /> <!-- Keeping player ships off the wanted board for now -->
+                    <!-- <check_value value="not event.param.isplayerowned" /> was keeping player owned ships off the board, now not -->
                     <check_any>
                         <check_value value="event.param.isclass.ship_s" />
                         <check_value value="event.param.isclass.ship_m" />
@@ -229,7 +236,7 @@
                         <event_object_destroyed group="global.$HHAllWanted" />
                         <check_value value="event.param.isclass.ship" />
                         <check_object object="event.param" deployable="false" />
-                        <check_value value="event.object.isclass.ship"/> 
+                        <check_value value="event.object.isclass.ship"/>
                     </check_all>
                 </conditions>
                 <actions>
@@ -254,7 +261,7 @@
                             title="'Bounty Claimed: %s'.[$wantedship.knownname]"
                             text="if $wantedclaimer.isplayerowned then '%s was destroyed in %s by %s\nBounty value: %s credits\n%s thanks you for your efforts'.[$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction] else '%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
                             interaction="showonmap" object="$wantedship" money="if $wantedclaimer.isplayerowned then global.$HeadHunterWantedTracker.{$wantedship}.$value else null" />
-                    <do_if value="$wantedclaimer.isplayerowned">
+                    <do_if value="$wantedclaimer.isplayerowned and not $wantedship.isplayerowned" comment="should handle any funny business of player killing own ship for bounty"> <!-- TODO: test killing own ship for bounty -->
                         <debug_to_file name="'wanted'" directory="'HeadHunter'"
                         text="'--PLAYERCLAIM-- Exact going to transfer_money: %s Default Formatted: %s Faction formula: %s'.[(global.$HeadHunterWantedTracker.{$wantedship}.$value),global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,0.00016LF + (0.00064LF / (4000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF)]"
                         output="false" append="true" chance="0" />
@@ -265,10 +272,6 @@
                         <signal_cue_instantly cue="PayoutEffect" param="[$rewardCr,$lastfaction]" />
                     </do_if>
                     <remove_value name="global.$HeadHunterWantedTracker.{$wantedship}" />
-                    <!-- v1.1 -->
-                    <!-- TODO: Speaklines 503:X detected 279:incoming funds transfer 511:X within sensor range (10044+513:page 20204 Bounty Hunter on intercept course (for player bounty thing later) 302224401:Target acquired 302224520:Proximity alert -->
-                    <!-- TODO: track bounty on player.entity? Send job ships to hunt player ships. As bounty grows, send stronger shit. speak line on ship.aipilot if ai or player.computer -->
-                    <!-- Idea: option to enable AI bounty hunters. Player ships can then be put on the wanted board. Kinda idea to be able to pay credits so player can post their own bounty on something and attract attention of the bounty hunters -->
                 </actions>
             </cue>
             <cue name="PayoutEffect" instantiate="true">
@@ -278,7 +281,6 @@
                     <set_value name="$FactionRep" exact="event.param.{2}.representative" />
                     <speak actor="player.computer" line="279" comment="Incoming funds transfer." priority="90" />             
                     <transfer_money from="event.param.{2}" to="faction.player" amount="event.param.{1}" />
-                    <debug_text text="'Rep -- $FactionRep: %s'.[$FactionRep]" />
                 </actions>
                 <cues>
                     <cue name="Speaky" instantiate="true">
@@ -319,17 +321,19 @@
                             <match shiptype="shiptype.xsdrone" negate="true" />
                             <match shiptype="shiptype.lasertower" negate="true" />
                             <match shiptype="shiptype.smalldrone" negate="true" />
+                            <match owner="faction.player" negate="true" /> <!-- don't notify about players own wanted ships -->
                     </count_gravidar_contacts>
                 </conditions>
                 <actions>
                     <do_for_each name="$contact" in="$contacts">
                         <do_if value="global.$HeadHunterWantedTracker.{$contact}?">
-                            <do_if value="not @global.$HHThrottled and event.object == player.ship" >
+                            <!--<do_if value="not @global.$HHThrottled and event.object == player.ship" >-->
+                            <do_if value="not @global.$HHThrottled and global.$PlayerShipsGroup.indexof.{event.object}" >
                                 <speak actor="player.computer" line="[2021,511]" />
                                 <show_notification text="[['Wanted Ship Nearby!\n%s %s worth %s credits'.[$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="90" />
                                 <set_value name="global.$HHThrottled" exact="true" />
                             </do_if>
-                            <do_elseif value="(not @global.$HHThrottled) and (event.object != player.ship) and (global.$HeadHunterProximityNotify)">
+                            <do_elseif value="(not @global.$HHThrottled) and (not global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify)">
                                 <play_sound sound="'ui_hud_soft_scan_pos_core'" object="player.entity" type="ui"/>
                                 <show_notification text="[['Wanted Ship Spotted\nLocation: %s\n%s %s worth %s credits'.[$contact.sector.knownname,$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="5" />
                                 <set_value name="global.$HHThrottled" exact="true" />
@@ -347,18 +351,31 @@
                 <event_ui_triggered screen="'MapMenu'" />
             </conditions>
             <actions>
-                <find_ship groupname="$TagCheck" space="player.galaxy" isinliveview="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" multiple="true">
-                    <match shiptype="shiptype.xsdrone" negate="true" />
-                    <match shiptype="shiptype.escapepod" negate="true" />
-                    <match shiptype="shiptype.distressdrone" negate="true" />
-                    <match shiptype="shiptype.lasertower" negate="true" />
-                    <match shiptype="shiptype.smalldrone" negate="true" />
-                </find_ship>
-                <do_for_each name="$found" in="$TagCheck">
-                    <do_if value="global.$HeadHunterWantedTracker.{$found}?">
-                        <add_holomap_text object="$found" text="':WANTED:'" />
-                    </do_if>
-                </do_for_each>
+                <do_if value="global.$HeadHunterPlayerMapTag == false">
+                    <find_ship groupname="$TagCheck" space="player.galaxy" isinliveview="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" multiple="true">
+                        <match shiptype="shiptype.xsdrone" negate="true" />
+                        <match shiptype="shiptype.escapepod" negate="true" />
+                        <match shiptype="shiptype.distressdrone" negate="true" />
+                        <match shiptype="shiptype.lasertower" negate="true" />
+                        <match shiptype="shiptype.smalldrone" negate="true" />
+                        <match owner="faction.player" negate="true" />
+                    </find_ship>
+                </do_if>
+                <do_else>
+                    <find_ship groupname="$TagCheck" space="player.galaxy" isinliveview="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" multiple="true">
+                        <match shiptype="shiptype.xsdrone" negate="true" />
+                        <match shiptype="shiptype.escapepod" negate="true" />
+                        <match shiptype="shiptype.distressdrone" negate="true" />
+                        <match shiptype="shiptype.lasertower" negate="true" />
+                        <match shiptype="shiptype.smalldrone" negate="true" />
+                    </find_ship>
+                </do_else>
+                    <do_for_each name="$found" in="$TagCheck">
+                        <do_if value="global.$HeadHunterWantedTracker.{$found}?">
+                            <add_holomap_text object="$found" text="':WANTED:'" />
+                        </do_if>
+                    </do_for_each>
+                    <remove_value name="$TagCheck" />
             </actions>
         </cue>
     </cues>
