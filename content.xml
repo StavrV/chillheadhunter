@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<content id="ws_2992233767" name="Head Hunter" description="Earn bounties and reputation for destroying enemies and extra bounty for hunting wanted pilots in the galaxy." author="Chillmatica" version="100" date="2023-06-13" save="0" enabled="1">
-    <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
+<content id="ws_2992233767" name="Head Hunter" description="Earn bounties and reputation for destroying enemies and extra bounty for hunting wanted pilots in the galaxy." author="Chillmatica" version="101" date="2023-06-20" save="0" enabled="1" sync="false" lastupdate="1687286931">
+  <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>

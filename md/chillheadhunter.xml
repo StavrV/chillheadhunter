@@ -72,7 +72,7 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'AI Ship Proximity Notifications',
+								$text = 'Wanted Ship Proximity Notifications',
 								$mouseOverText= 'Enables notifications when player AI ships spot a wanted ship.',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"

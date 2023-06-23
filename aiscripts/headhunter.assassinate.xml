@@ -39,15 +39,18 @@
 				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'$contacts count: %s, Current location: %s'.[$contacts.count,this.assignedcontrolled.sector.knownname]" output="false" append="true" chance="0" />
 				<do_for_each name="$contact" in="$contacts">
                     <do_if value="global.$HHAllWanted.indexof.{$contact}">
-						<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'SPOTTED wanted player!!'" output="false" append="true" chance="0" />
-						<do_if value="global.$PlayerShipsGroup.indexof.{$contact}">
-							<speak actor="player.computer" line="[2021,513]" priority="90"/>
-						</do_if>
-						<set_object_name object="this.assignedcontrolled" name="this.assignedcontrolled.knownname+' Head Hunter'" />
-						<do_if value="this.assignedcontrolled.subordinates.count">
-							<do_all exact="this.assignedcontrolled.subordinates.count" counter="$i">
-								<set_object_name object="this.assignedcontrolled.subordinates.{$i}" name="this.assignedcontrolled.subordinates.{$i}.knownname+' Head Hunter'" />
-							</do_all>
+						<do_if value="not this.assignedcontrolled.pilot.$renamed?">
+							<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'SPOTTED wanted player!!'" output="false" append="true" chance="0" />
+							<do_if value="global.$PlayerShipsGroup.indexof.{$contact}">
+								<speak actor="player.computer" line="[2021,513]" priority="90"/>
+							</do_if>
+							<set_object_name object="this.assignedcontrolled" name="this.assignedcontrolled.knownname+' Head Hunter'" />
+							<do_if value="this.assignedcontrolled.subordinates.count">
+								<do_all exact="this.assignedcontrolled.subordinates.count" counter="$i">
+									<set_object_name object="this.assignedcontrolled.subordinates.{$i}" name="this.assignedcontrolled.subordinates.{$i}.knownname+' Head Hunter'" />
+								</do_all>
+							</do_if>
+							<set_value name="this.assignedcontrolled.pilot.$renamed" exact="true" />
 						</do_if>
 						<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
 							<param name="primarytarget" value="$contact" />

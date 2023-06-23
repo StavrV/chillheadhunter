@@ -89,7 +89,7 @@
                                 <set_value name="$countL" exact="$countL + 1" />
                             </do_elseif>
                             <do_elseif value="$supportingtargets.{$i}.isclass.ship_xl"> 
-                                <set_value name="$countXL" exact="$countL + 3" /> <!-- Bounty hunters probably not rolling carriers but we'll roll 3 DD for each -->
+                                <set_value name="$countL" exact="$countL + 3" /> <!-- Bounty hunters probably not rolling carriers but we'll roll 3 DD for each -->
                             </do_elseif>
                         </do_all>
                         <debug_to_file name="'hunted'" directory="'HeadHunter'"
@@ -105,16 +105,15 @@
                                 text="'Difficulty: %s'.[$Difficulty]"
                                 output="false" append="true" chance="Init.$HuntedDebug" />
 
-                        <set_value name="$NumberS" exact="$countS" /> <!-- maybe a small random range -->
+                       <!-- <set_value name="$NumberS" exact="$countS" comment="stage this for maybe a small random range later. for now exact." />
                         <set_value name="$NumberM" exact="$countM" />
-                        <set_value name="$NumberL" exact="$countL" />
-                        <set_value name="$NumberXL" exact="$countXL" />
+                        <set_value name="$NumberL" exact="$countL" /> -->
                     </actions>
                     <cues>
                         <cue name="CreateHuntersS" ref="md.LIB_Create_Ships.Start"  >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
-                            <param name="Ship_Amount" value="$NumberS" />
+                            <param name="Ship_Amount" value="$countS" />
                             <param name="Ship_Faction" value="$SendingFaction" />
                             <param name="Ship_CategoryFaction" value="$SendingFaction" />
                             <param name="Ship_Category_Size" value="class.ship_s" />
@@ -128,7 +127,7 @@
                         <cue name="CreateHuntersM" ref="md.LIB_Create_Ships.Start"  >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
-                            <param name="Ship_Amount" value="$NumberM" />
+                            <param name="Ship_Amount" value="$countM" />
                             <param name="Ship_Faction" value="$SendingFaction" />
                             <param name="Ship_CategoryFaction" value="$SendingFaction" />
                             <param name="Ship_Category_Size" value="class.ship_m" />
@@ -142,7 +141,7 @@
                         <cue name="CreateHuntersL" ref="md.LIB_Create_Ships.Start"  >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
-                            <param name="Ship_Amount" value="$NumberL" />
+                            <param name="Ship_Amount" value="$countL" />
                             <param name="Ship_Faction" value="$SendingFaction" />
                             <param name="Ship_CategoryFaction" value="$SendingFaction" />
                             <param name="Ship_Category_Size" value="class.ship_l" />

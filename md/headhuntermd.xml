@@ -327,8 +327,7 @@
                 <actions>
                     <do_for_each name="$contact" in="$contacts">
                         <do_if value="global.$HeadHunterWantedTracker.{$contact}?">
-                            <!--<do_if value="not @global.$HHThrottled and event.object == player.ship" >-->
-                            <do_if value="not @global.$HHThrottled and global.$PlayerShipsGroup.indexof.{event.object}" >
+                            <do_if value="(not @global.$HHThrottled) and (global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify)" >
                                 <speak actor="player.computer" line="[2021,511]" />
                                 <show_notification text="[['Wanted Ship Nearby!\n%s %s worth %s credits'.[$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="90" />
                                 <set_value name="global.$HHThrottled" exact="true" />
@@ -370,12 +369,12 @@
                         <match shiptype="shiptype.smalldrone" negate="true" />
                     </find_ship>
                 </do_else>
-                    <do_for_each name="$found" in="$TagCheck">
-                        <do_if value="global.$HeadHunterWantedTracker.{$found}?">
-                            <add_holomap_text object="$found" text="':WANTED:'" />
-                        </do_if>
-                    </do_for_each>
-                    <remove_value name="$TagCheck" />
+                <do_for_each name="$found" in="$TagCheck">
+                    <do_if value="global.$HeadHunterWantedTracker.{$found}?">
+                        <add_holomap_text object="$found" text="':WANTED:'" />
+                    </do_if>
+                </do_for_each>
+                <remove_value name="$TagCheck" />
             </actions>
         </cue>
     </cues>
