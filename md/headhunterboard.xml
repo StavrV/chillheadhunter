@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="HeadHunterBoard" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-		<cue name="Setup" namespace="this">
+		<cue name="Setup" namespace="this" version="1">
 			<conditions>
 				<check_any>
 					<event_universe_generated/>
@@ -11,10 +11,15 @@
 			<actions>
                 <debug_text text="'HeadHunter Wanted Board initial setup.'" />
                     <do_if value="not global.$HHSortValue?">
-                        <set_value name="global.$HHSortValue" exact="true" />
+                        <set_value name="global.$HHSortValue" exact="2" />
                     </do_if>
                 <debug_text text="'HeadHunter Board: initial variables set so carrying on.'" />
 			</actions>
+            <patch sinceversion="1">
+                <do_if value="(global.$HHSortValue == true) or (global.$HHSortValue == false)">
+                    <set_value name="global.$HHSortValue" exact="2" />
+                </do_if>
+            </patch>
 		</cue>
         <cue name="HeadHunterBoardInit" instantiate="false">
             <conditions><event_universe_generated /></conditions>
@@ -84,6 +89,9 @@
 							<create_list name="$FactionList"/>
 						</do_else>
                         <do_for_each name="$bleh" in="global.$HeadHunterWantedTracker">
+                            <do_if value="$bleh.trueowner == null">
+                                <remove_value name="global.$HeadHunterWantedTracker.{$bleh}" /> <!-- ships with no faction are getting on the list so nuke them here -->
+                            </do_if>
                             <do_if value="not $FactionList.indexof.{$bleh.trueowner}">
                                 <append_to_list name="$FactionList" exact="$bleh.trueowner" />
                             </do_if>
@@ -130,13 +138,25 @@
 								$refresh = true,
 								],
 							]"/>
+                        <do_if value="global.$HHSortValue == 2">
+                            <set_value name="$buttontext" exact="'By Value'" />
+                            <set_value name="$buttoncolor" exact="'Helper.color.green'" />
+                        </do_if>
+                        <do_elseif value="global.$HHSortValue == 3">
+                            <set_value name="$buttontext" exact="'By Distance'" />
+                            <set_value name="$buttoncolor" exact="'Helper.color.red'" />
+                        </do_elseif>
+                        <do_elseif value="global.$HHSortValue == 4">
+                            <set_value name="$buttontext" exact="'By Latest Intel'" />
+                            <set_value name="$buttoncolor" exact="'Helper.color.brightyellow'" />
+                        </do_elseif>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 9, 
 								$colSpan = 4,
 								$text = table[
-								  $text   =  if global.$HHSortValue == true then 'By Value' else 'By Distance', 
-								  $color  =  if global.$HHSortValue == true then 'Helper.color.green' else 'Helper.color.blue',
+								  $text   =  $buttontext, 
+								  $color  =  $buttoncolor,
 								  $halign = 'center',
 								],
 								$onClick = HHToggleSort,
@@ -147,12 +167,15 @@
                 <library name="PopulateWantedRows">
                     <actions>
                         <set_value name="$AllWantedCopy" exact="global.$HHAllWanted" />
-                        <do_if value="global.$HHSortValue == true">
+                        <do_if value="global.$HHSortValue == 2">
                             <sort_group group="$AllWantedCopy" sortbyvalue="global.$HeadHunterWantedTracker.{loop.element}.$value" sortdescending="true" />
                         </do_if>
-                        <do_else>
+                        <do_elseif value="global.$HHSortValue == 3">
                             <sort_group group="$AllWantedCopy" sortbygatedistanceto="player.entity" sortdescending="false"/>
-                        </do_else>
+                        </do_elseif>
+                        <do_elseif value="global.$HHSortValue == 4">
+                            <sort_group group="$AllWantedCopy" sortbyvalue="@global.$HeadHunterWantedTracker.{loop.element}.$lastseentime" sortdescending="true"/>
+                        </do_elseif>
                         <do_if value="$SelectedFaction == 'All'">
                             <do_for_each name="$wantedship" in="$AllWantedCopy" counter="$i">
                                     <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row"/>
@@ -228,8 +251,15 @@
                         <event_cue_signalled />
                     </conditions>
                     <actions>
-                        <set_value name="global.$HHSortValue"
-                            exact="if global.$HHSortValue == true then false else true" />
+                        <do_if value="global.$HHSortValue == 2">
+                             <set_value name="global.$HHSortValue" exact="3" />
+                        </do_if>
+                        <do_elseif value="global.$HHSortValue == 3" >
+                            <set_value name="global.$HHSortValue" exact="4" />
+                        </do_elseif>
+                       <do_elseif value="global.$HHSortValue == 4" >
+                            <set_value name="global.$HHSortValue" exact="2" />
+                        </do_elseif>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>
                 </cue>
