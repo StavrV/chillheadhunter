@@ -71,8 +71,8 @@
                             </do_elseif>
                             <!-- Bounty Handling -->
                             <do_if value="global.$HeadHunterBountyMultiplier != 0">
-                                <set_value name="$reward" min="($enemyhealthdeath*0.4)i"
-                                    max="($enemyhealthdeath*0.6)i" />
+                                <set_value name="$reward" min="($enemyhealthdeath*0.5)i"
+                                    max="($enemyhealthdeath*1)i" />
                                 <set_value name="$rewardmodified" exact="$reward*global.$HeadHunterBountyMultiplier" />
                                 <set_value name="$rewardCr" exact="($rewardmodified)Cr" />
                                 <debug_to_file name="'bounties'" directory="'HeadHunter'"
@@ -81,7 +81,7 @@
                                 <write_to_logbook category="alerts"
                                     title="'Earned General Bounty'"
                                     text="'%s has paid a general bounty for the destruction of their enemy %s %s in the amount of %,s credits'.[$payer,$enemy.knownname,$enemy.idcode,$rewardmodified]"
-                                    interaction="showonmap" object="$attacker" money="($rewardmodified)Cr" />
+                                    interaction="showonmap" object="$attacker" money="($reward)Cr" bonus="($rewardmodified)Cr-($reward)Cr" />
                                 <transfer_money from="$enemy.sector.trueowner" to="faction.player"
                                     amount="$rewardCr" />
                             </do_if>
@@ -343,6 +343,33 @@
                             <set_value name="global.$HeadHunterWantedTracker.{$contact}.$lastseentime" exact="player.age" />
                         </do_if>
                     </do_for_each>
+                </actions>
+            </cue>
+            <cue name="LCapturedHandler" instantiate="true">
+                <conditions>
+                    <event_object_claimed claimed="global.$HHAllWanted" />
+                    <check_value value="event.object.isclass.ship_l or event.object.isclass.ship_xl" />
+                </conditions>
+                <actions>
+                    <remove_from_group group="global.$HHAllWanted" object="event.object" />
+                    <remove_value name="global.$HeadHunterWantedTracker.{event.object}" />
+                    <add_holomap_text object="event.object" text="null" />
+                    <debug_to_file name="'general'" directory="'HeadHunter'" text="'Wanted ship captured. Removing bounty. %s %s'.[event.object.idcode,event.object.knownname]" output="false" append="true" chance="0" />
+                </actions>
+            </cue>
+            <cue name="SCapturedHandler" instantiate="true">
+                <conditions>
+                    <event_object_abandoned group="global.$HHAllWanted" />
+                    <check_value value="event.object.isclass.ship_s or event.object.isclass.ship_m" />
+                </conditions>
+                <actions>
+                    <set_value name="$rewardCr" exact="(global.$HeadHunterWantedTracker.{event.object}.$value/100)Cr" />
+                    <set_value name="$lastfaction" exact="global.$HeadHunterWantedTracker.{event.object}.$lastvictimfaction" />
+                    <remove_from_group group="global.$HHAllWanted" object="event.object" />
+                    <remove_value name="global.$HeadHunterWantedTracker.{event.object}" />
+                    <add_holomap_text object="event.object" text="null" />
+                    <signal_cue_instantly cue="PayoutEffect" param="[$rewardCr,$lastfaction]" />
+                    <debug_to_file name="'general'" directory="'HeadHunter'" text="'Wanted ship abandoned. %s %s'.[event.object.idcode,event.object.knownname]" output="false" append="true" chance="0" />
                 </actions>
             </cue>
          </cues>
