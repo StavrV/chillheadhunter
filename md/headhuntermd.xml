@@ -52,7 +52,7 @@
                         <set_value name="$payer" exact="'The Intergalactic Bounty Fund'" />
                             <!-- Rep handling -->
                             <do_if value="$enemy.relationto.{$enemy.sector.trueowner} lt 0 and $enemy.sector.trueowner != faction.player">
-                                <do_if value="$enemy.sector.trueowner.relationto.{faction.player} lt 1.0 ">
+                                <do_if value="$enemy.sector.trueowner.relationto.{faction.player} lt 1 ">
                                 <add_faction_relation faction="faction.player"
                                     otherfaction="$enemy.sector.trueowner"
                                     value="HHAttackTagger.$reputationcalc"
@@ -82,8 +82,7 @@
                                     title="'Earned General Bounty'"
                                     text="'%s has paid a general bounty for the destruction of their enemy %s %s in the amount of %,s credits'.[$payer,$enemy.knownname,$enemy.idcode,$rewardmodified]"
                                     interaction="showonmap" object="$attacker" money="($reward)Cr" bonus="($rewardmodified)Cr-($reward)Cr" />
-                                <transfer_money from="$enemy.sector.trueowner" to="faction.player"
-                                    amount="$rewardCr" />
+                                <transfer_money from="faction.civilian" to="faction.player" amount="$rewardCr" comment="doesnt really matter where it comes from as the payer isnt logged" />
                             </do_if>
                         <cancel_cue cue="Watcher" />
                     </actions>
@@ -119,53 +118,50 @@
                 <match shiptype="shiptype.lasertower" negate="true" />
                 <match shiptype="shiptype.smalldrone" negate="true" />
             </find_ship_by_true_owner>
-            <debug_to_file name="'general'" directory="'HeadHunter'"
-                        text="'PapaCue gathered %s player ships'.[global.$HHAllPlayerOwnedShips.count]"
-                        output="false" append="true" chance="0" />
-            <debug_text text="'HeadHunter PapaCue Activated. Ready to start tracking.'" />
+            <clear_group group="global.$HHAllShips" />
+            <find_ship space="player.galaxy" checkoperational="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" groupname="global.$HHAllShips" multiple="true" active="true" >
+                <match shiptype="shiptype.xsdrone" negate="true" />
+                <match shiptype="shiptype.escapepod" negate="true" />
+                <match shiptype="shiptype.distressdrone" negate="true" />
+                <match shiptype="shiptype.lasertower" negate="true" />
+                <match shiptype="shiptype.smalldrone" negate="true" />
+                <match owner="[faction.buccaneers,faction.civilian,faction.criminal,faction.khaak,faction.ownerless,faction.player,faction.scaleplate,faction.yaki,faction.xenon,faction.visitor]" negate="true" />
+            </find_ship>
+            <clear_group group="global.$HHAllWanted" /> 
+            <do_for_each name="$wantedship" in="global.$HeadHunterWantedTracker">
+                <do_if value="$wantedship.exists">
+                    <add_to_group groupname="global.$HHAllWanted" object="$wantedship" />
+                </do_if>
+            </do_for_each>
+            <clear_group group="global.$HHAllPlayerWanted" /> 
+            <do_for_each name="$playership" in="global.$HeadHunterWantedTracker">
+                <do_if value="$playership.exists and $playership.owner == faction.player">
+                    <add_to_group groupname="global.$HHAllPlayerWanted" object="$playership" />
+                </do_if>
+            </do_for_each>
+            <debug_text text="'HeadHunter PapaCue Activated. Tracking %s ships, %s wanted ships, %s player wanted ships.'.[global.$HHAllShips.count,global.$HHAllWanted.count,global.$HHAllPlayerWanted.count]" />
 
         </actions>
         <cues>
-            <cue name="HHGatherTimer" instantiate="true" checkinterval="10s" checktime="player.age + 30s">
+            <cue name="HHGatherTimer" instantiate="true" checkinterval="30s" checktime="player.age + 30s">
                 <actions>
                     <debug_to_file name="'general'" directory="'HeadHunter'"
                         text="'HHGatherTimer firing...'"
                         output="false" append="true" chance="0" />
-                    <signal_cue_instantly cue="GatherAllYeShips"/>
+                    <signal_cue_instantly cue="RefreshWatchers"/>
                 </actions>
             </cue>
-            <cue name="GatherAllYeShips" instantiate="true">
+            <cue name="RefreshWatchers" instantiate="true">
                 <conditions><event_cue_signalled /></conditions>
                 <actions>
-                    <clear_group group="global.$HHAllShips" />
-                    <find_ship space="player.galaxy" checkoperational="true" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" functional="true" groupname="global.$HHAllShips" multiple="true" >
-                        <match shiptype="shiptype.xsdrone" negate="true" />
-                        <match shiptype="shiptype.escapepod" negate="true" />
-                        <match shiptype="shiptype.distressdrone" negate="true" />
-                        <match shiptype="shiptype.lasertower" negate="true" />
-                        <match shiptype="shiptype.smalldrone" negate="true" />
-                        <match owner="[faction.buccaneers,faction.civilian,faction.criminal,faction.khaak,faction.ownerless,faction.player,faction.scaleplate,faction.yaki,faction.xenon,faction.visitor]" negate="true" />
-                    </find_ship>
-                    <clear_group group="global.$HHAllWanted" />
-                    <do_for_each name="$wantedshipship" in="global.$HeadHunterWantedTracker">
-                        <do_if value="$wantedshipship.exists">
-                            <add_to_group groupname="global.$HHAllWanted" object="$wantedshipship" />
-                        </do_if>
-                    </do_for_each>
-                    <clear_group group="global.$HHAllPlayerWanted" />
-                    <do_for_each name="$playership" in="global.$HeadHunterWantedTracker">
-                        <do_if value="$playership.exists and $playership.owner == faction.player">
-                            <add_to_group groupname="global.$HHAllPlayerWanted" object="$playership" />
-                        </do_if>
-                    </do_for_each>
                     <reset_cue cue="WantedClaimTracker" />
                     <reset_cue cue="WantedDestructionTracker" />
                    <debug_to_file name="'general'" directory="'HeadHunter'"
-                        text="'Gathered all ye olde ships! Total watching: %s Total Wanted: %s Total Player Wanted: %s'.[global.$HHAllShips.count,global.$HHAllWanted.count,global.$HHAllPlayerWanted.count]"
+                        text="'Watchers refreshed. Total watching: %s Total Wanted: %s Total Player Wanted: %s'.[global.$HHAllShips.count,global.$HHAllWanted.count,global.$HHAllPlayerWanted.count]"
                         output="false" append="true" chance="0" />
-                    <debug_to_file name="'general'" directory="'HeadHunter'"
+                   <!--<debug_to_file name="'general'" directory="'HeadHunter'"
                         text="'Cue States - Destruction: %s WantedClaim: %s Payout: %s Speaky: %s'.[WantedDestructionTracker.state,WantedClaimTracker.state,PayoutEffect.state,Speaky.state]"
-                        output="false" append="true" chance="0" />
+                        output="false" append="true" chance="0" /> -->
                 </actions>
             </cue>
             <cue name="WantedDestructionTracker" instantiate="true" >
@@ -229,6 +225,17 @@
                                 text="'\nNEW WANTED: Killer: %s Victim: %s \nTrue Value: %s Value: %s Location: %s'.[$killer.knownname,$victim.knownname,$victim.value.formatted.default,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default,$killer.sector.knownname]"
                                 output="false" append="true" chance="0" />
                     </do_else>
+                    <!-- v1.3 -->
+                    <do_if value="$killer.isplayerowned and not global.$HHAllPlayerWanted.indexof.{$killer}">
+                        <add_to_group groupname="global.$HHAllPlayerWanted" object="$killer" />
+                    </do_if>
+                    <do_if value="not global.$HHAllWanted.indexof.{$killer}">
+                        <add_to_group groupname="global.$HHAllWanted" object="$killer" />
+                    </do_if>
+                    <remove_from_group group="global.$HHAllShips" object="$victim" />
+                    <debug_to_file name="'general'" directory="'HeadHunter'"
+                        text="'Ship from HHAllShips was destroyed. Present in group?: %s Name: %s Sector: %s'.[global.$HHAllShips.indexof.{$victim},$victim.knownname,$victim.sector.knownname]"
+                        output="false" append="true" chance="0" />
                 </actions>
             </cue>
             <cue name="WantedClaimTracker" instantiate="true"> 
@@ -262,7 +269,7 @@
                             title="'Bounty Claimed: %s'.[$wantedship.knownname]"
                             text="if $wantedclaimer.isplayerowned then '%s was destroyed in %s by %s\nBounty value: %s credits\n%s thanks you for your efforts'.[$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction] else '%s %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.idcode,$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default]"
                             interaction="showonmap" object="$wantedship" money="if $wantedclaimer.isplayerowned then global.$HeadHunterWantedTracker.{$wantedship}.$value else null" />
-                    <do_if value="$wantedclaimer.isplayerowned and not $wantedship.isplayerowned" comment="should handle any funny business of player killing own ship for bounty"> <!-- TODO: test killing own ship for bounty -->
+                    <do_if value="$wantedclaimer.isplayerowned and not $wantedship.isplayerowned" comment="should handle any funny business of player killing own ship for bounty">
                         <debug_to_file name="'wanted'" directory="'HeadHunter'"
                         text="'--PLAYERCLAIM-- Exact going to transfer_money: %s Default Formatted: %s Faction formula: %s'.[(global.$HeadHunterWantedTracker.{$wantedship}.$value),global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,0.00016LF + (0.00064LF / (4000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF)]"
                         output="false" append="true" chance="0" />
@@ -272,6 +279,7 @@
                         <set_value name="$lastfaction" exact="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction" />
                         <signal_cue_instantly cue="PayoutEffect" param="[$rewardCr,$lastfaction]" />
                     </do_if>
+                    <remove_from_group group="global.$HHAllWanted" object="$wantedship" />
                     <remove_value name="global.$HeadHunterWantedTracker.{$wantedship}" />
                 </actions>
             </cue>
@@ -280,8 +288,12 @@
                 <delay exact="2s" />
                 <actions>
                     <set_value name="$FactionRep" exact="event.param.{2}.representative" />
-                    <speak actor="player.computer" line="279" comment="Incoming funds transfer." priority="90" />             
-                    <transfer_money from="event.param.{2}" to="faction.player" amount="event.param.{1}" />
+                    <speak actor="player.computer" comment="Incoming funds transfer from Faction" priority="90" >
+                        <text line="279" />
+                        <name value="event.param.{2}" />
+                    </speak>
+                    <!-- <transfer_money from="event.param.{2}" to="faction.player" amount="event.param.{1}" /> -->
+                    <transfer_money from="faction.civilian" to="faction.player" amount="event.param.{1}" />
                 </actions>
                 <cues>
                     <cue name="Speaky" instantiate="true">
@@ -307,7 +319,7 @@
                     <add_to_group groupname="global.$HHAllPlayerOwnedShips" object="event.param" />
                 </actions>
             </cue>
-            <cue name="ProximityThrottle" instantiate="true" checktime="player.age + 30s" checkinterval="30s" comment="My way to stop gravidar event spam on each event of the same ship">
+            <cue name="ProximityThrottle" instantiate="true" checktime="player.age + 60s" checkinterval="60s" comment="My way to stop gravidar event spam on each event of the same ship">
             <actions>
                 <set_value name="global.$HHThrottled" exact="false" />
             </actions>
@@ -370,6 +382,24 @@
                     <add_holomap_text object="event.object" text="null" />
                     <signal_cue_instantly cue="PayoutEffect" param="[$rewardCr,$lastfaction]" />
                     <debug_to_file name="'general'" directory="'HeadHunter'" text="'Wanted ship abandoned. %s %s'.[event.object.idcode,event.object.knownname]" output="false" append="true" chance="0" />
+                </actions>
+            </cue>
+            <cue name="AllShipsHandler" instantiate="true">
+                <conditions>
+                    <check_all>
+                        <event_job_ship_activated />
+                        <check_object object="event.param" class="[class.ship_s,class.ship_m,class.ship_l,class.ship_xl]" owner="[faction.buccaneers,faction.civilian,faction.criminal,faction.khaak,faction.ownerless,faction.player,faction.scaleplate,faction.yaki,faction.xenon,faction.visitor]" negateownerfilter="true" >
+                            <match shiptype="shiptype.xsdrone" negate="true" />
+                            <match shiptype="shiptype.escapepod" negate="true" />
+                            <match shiptype="shiptype.distressdrone" negate="true" />
+                            <match shiptype="shiptype.lasertower" negate="true" />
+                            <match shiptype="shiptype.smalldrone" negate="true" />
+                        </check_object>
+                    </check_all>
+                </conditions>
+                <actions>
+                    <debug_to_file name="'general'" directory="'HeadHunter'" text="'\nNew ship built. %s %s in %s by %s. Wasnt a duplicate right? %s'.[event.param.idcode,event.param.knownname,event.param.sector.knownname,event.param.owner.knownname,global.$HHAllShips.indexof.{event.param}]" output="false" append="true" chance="0" />
+                    <add_to_group groupname="global.$HHAllShips" object="event.param" />
                 </actions>
             </cue>
          </cues>
