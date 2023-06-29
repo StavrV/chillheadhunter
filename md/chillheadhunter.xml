@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="LoadStuffAndSetup">
+        <cue name="LoadStuffAndSetup" version="2">
 			<conditions>
 				<event_universe_generated/>
 			</conditions>
@@ -14,6 +14,7 @@
                     <set_value name="global.$HeadHunterPlayerMapTag" exact="true" />
                     <set_value name="global.$HeadHunterHuntersEnabled" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
+                    <set_value name="global.$HeadHunterClassicBaddies" exact="false" />
                     <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNPCNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNPCNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
                 <do_else>
@@ -21,6 +22,12 @@
                 </do_else>
                 <show_help color="[179,102,255,255]" duration="12s" halign="'center'" position="1" custom="'Head Hunter Mod Installed: This is the way'" />
 			</actions>
+            <patch sinceversion="2">
+                <do_if value="not global.$HeadHunterClassicBaddies?">
+                    <set_value name="global.$HeadHunterClassicBaddies" exact="false" />
+                    <debug_text text="'HeadHunter: patched in Classic Baddies option'" filter="scripts" />
+                </do_if>
+            </patch>
 		</cue>
         <cue name="HHOptsInit" instantiate="false">
             <actions>
@@ -126,6 +133,26 @@
 								],
 								$onClick = HuntersToggle,
 								$onRightClick = HuntersToggle,
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
+								$colSpan = 2,
+								$text = 'No Faction Wanted Bounties',
+								$mouseOverText= 'Only allow classic badies on the wanted board (Xenon/Khaak/Pirates)',
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 3, 
+								$colSpan = 1,
+								$text = table[
+								  $text   =  if global.$HeadHunterClassicBaddies == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterClassicBaddies == true then 'Helper.color.green' else 'Helper.color.red',
+								  $halign = 'center',
+								],
+								$onClick = ClassicBaddiesToggle,
+								$onRightClick = ClassicBaddiesToggle,
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
@@ -244,6 +271,19 @@
                         <set_value name="global.$HeadHunterHuntersEnabled"
                             exact="if global.$HeadHunterHuntersEnabled == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="ClassicBaddiesToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterClassicBaddies"
+                            exact="if global.$HeadHunterClassicBaddies == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                        <do_if value="global.$HeadHunterClassicBaddies">
+                            <show_help color="[179,102,255,255]" duration="15s" halign="'center'" position="1" custom="'When enabling No Wanted Factions you should also click the Reset Wanted Board button'" allowclose="true" log="true" force="true"/>
+                        </do_if>
                     </actions>
                 </cue>
                 <cue name="ClearWantedBoard" instantiate="true">

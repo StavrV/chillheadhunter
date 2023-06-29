@@ -214,24 +214,42 @@
                             
                     <!-- Killer is new. Add to the board -->
                     <do_else>
+                        
                          <do_if value="($victim.value == null)">
                              <debug_to_file name="'wanted'" directory="'HeadHunter'"
                                 text="'\nERROR: A victim value was null for some reason. Skipping.'.[@$killer.idcode,@$killer.knownname,@$victim.idcode,@$victim.knownname]"
                                 output="false" append="true" chance="0" />
                             <break />
                         </do_if>
+                    <!-- v1.4 probably cleaner with check_object -->
+                    <do_if value="not global.$HeadHunterClassicBaddies">
                         <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = (($victim.value/10) - ($victim.seed % (($victim.value/10) / 10))),$lastseen = $killer.sector,$lastvictimfaction = $victim.trueowner,$lastseentime = player.age]" />
                         <debug_to_file name="'wanted'" directory="'HeadHunter'"
                                 text="'\nNEW WANTED: Killer: %s Victim: %s \nTrue Value: %s Value: %s Location: %s'.[$killer.knownname,$victim.knownname,$victim.value.formatted.default,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default,$killer.sector.knownname]"
                                 output="false" append="true" chance="0" />
+                    </do_if>
+                    <do_elseif value="global.$HeadHunterClassicBaddies and ($killer.trueowner == faction.xenon or $killer.trueowner == faction.khaak or $killer.trueowner == faction.scaleplate or $killer.trueowner == faction.buccaneers)">
+                        <set_value name="global.$HeadHunterWantedTracker.{$killer}" exact="table[$killer = $killer,$value = (($victim.value/10) - ($victim.seed % (($victim.value/10) / 10))),$lastseen = $killer.sector,$lastvictimfaction = $victim.trueowner,$lastseentime = player.age]" />
+                        <debug_to_file name="'wanted'" directory="'HeadHunter'"
+                                text="'\nNEW WANTED: Killer: %s Victim: %s \nTrue Value: %s Value: %s Location: %s'.[$killer.knownname,$victim.knownname,$victim.value.formatted.default,global.$HeadHunterWantedTracker.{$killer}.$value.formatted.default,$killer.sector.knownname]"
+                                output="false" append="true" chance="0" />
+                    </do_elseif>
                     </do_else>
                     <!-- v1.3 -->
                     <do_if value="$killer.isplayerowned and not global.$HHAllPlayerWanted.indexof.{$killer}">
                         <add_to_group groupname="global.$HHAllPlayerWanted" object="$killer" />
                     </do_if>
-                    <do_if value="not global.$HHAllWanted.indexof.{$killer}">
-                        <add_to_group groupname="global.$HHAllWanted" object="$killer" />
+                    <do_if value="not global.$HeadHunterClassicBaddies">
+                        <do_if value="not global.$HHAllWanted.indexof.{$killer}">
+                            <add_to_group groupname="global.$HHAllWanted" object="$killer" />
+                        </do_if>
                     </do_if>
+                    <!-- v1.4 -->
+                    <do_elseif value="global.$HeadHunterClassicBaddies and ($killer.trueowner == faction.xenon or $killer.trueowner == faction.khaak or $killer.trueowner == faction.scaleplate or $killer.trueowner == faction.buccaneers)">
+                        <do_if value="not global.$HHAllWanted.indexof.{$killer}">
+                            <add_to_group groupname="global.$HHAllWanted" object="$killer" />
+                        </do_if>
+                    </do_elseif>
                     <remove_from_group group="global.$HHAllShips" object="$victim" />
                     <debug_to_file name="'general'" directory="'HeadHunter'"
                         text="'Ship from HHAllShips was destroyed. Present in group?: %s Name: %s Sector: %s'.[global.$HHAllShips.indexof.{$victim},$victim.knownname,$victim.sector.knownname]"
@@ -430,7 +448,7 @@
                 </do_else>
                 <do_for_each name="$found" in="$TagCheck">
                     <do_if value="global.$HeadHunterWantedTracker.{$found}?">
-                        <add_holomap_text object="$found" text="':WANTED:'" />
+                        <add_holomap_text object="$found" text="'(%s)'.[global.$HeadHunterWantedTracker.{$found}.$value.formatted.{'%1cs'}]" />
                     </do_if>
                 </do_for_each>
                 <remove_value name="$TagCheck" />
