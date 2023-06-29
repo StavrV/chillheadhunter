@@ -140,7 +140,7 @@
 								$col = 1,
 								$colSpan = 2,
 								$text = 'No Faction Wanted Bounties',
-								$mouseOverText= 'Only allow classic badies on the wanted board (Xenon/Khaak/Pirates)',
+								$mouseOverText= 'Only allow classic baddies on the wanted board (Xenon/Khaak/Pirates)',
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
