@@ -159,7 +159,6 @@
                         <event_cue_signalled />
                     </conditions>
                     <actions>
-                        <create_ship ><owner></owner></create_ship>
                         <debug_to_file name="'hunted'" directory="'HeadHunter'"
                         text="'Hunters are alive! Maybe...Count: %s'.[this.$LIB_Create_Ships_Result.count]"
                         output="false" append="true" chance="Init.$HuntedDebug" />
