@@ -114,7 +114,7 @@
 	</interrupts>
 	<init>
 		<!-- Debug & Init -->
-		<set_value name="$HunterAIDebug" exact="100" />
+		<set_value name="$HunterAIDebug" exact="0" />
 		<set_value name="$searching" exact="false" />
 		<set_value name="$findcamping" exact="false" />
 		<debug_to_file name="'hunted'" directory="'HeadHunter'"
