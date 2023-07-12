@@ -36,11 +36,10 @@
                 </count_gravidar_contacts>
 			</conditions>
 			<actions>
-				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'$contacts count: %s, Current location: %s'.[$contacts.count,this.assignedcontrolled.sector.knownname]" output="false" append="true" chance="0" />
+				<debug_text text="'HeadHunter: $contacts count: %s, Current location: %s IAm: %s %s'.[$contacts.count,this.assignedcontrolled.sector.knownname,this.assignedcontrolled.idcode,this.assignedcontrolled.knownname]" filter="scripts" chance="0"/>
 				<do_for_each name="$contact" in="$contacts">
                     <do_if value="global.$HHAllWanted.indexof.{$contact}">
 						<do_if value="not this.assignedcontrolled.pilot.$renamed?">
-							<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'SPOTTED wanted player!!'" output="false" append="true" chance="0" />
 							<do_if value="global.$PlayerShipsGroup.indexof.{$contact}">
 								<speak actor="player.computer" line="[2021,513]" priority="90"/>
 							</do_if>
@@ -66,25 +65,6 @@
                 </do_for_each>
 			</actions>
 		</handler>
-		<handler> <!--event: target destroyed, no other wanted in sight -->
-			<conditions>
-				<event_object_destroyed object="$target"/>
-				<check_value value="event.object.owner" exact="faction.player" />
-			</conditions>
-			<actions>
-				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Leaders target died. Cancel hostiles'" output="false" append="true" chance="0" />
-				<do_for_each name="$hunter" in="global.$HHHunters">
-					<do_if value="$hunter.hasrelation.enemy.{faction.player}">
-						<reset_relation_boost object="$hunter" faction="faction.player"/>
-						<set_tolerance_boost delay="30s" decay="1" value="1" object="$hunter" faction="faction.player" />
-						<cease_fire object="$hunter"/>
-						<do_if value="$hunter.isclass.[class.ship_l, class.ship_xl] and $hunter.defencenpc.exists">
-							<signal_objects object="$hunter.defencenpc" param="'stop attack'"/>
-						</do_if>
-                  </do_if>
-				</do_for_each>
-			</actions>
-		</handler>
 		<handler>
 			<conditions>
 				<check_all>
@@ -93,24 +73,9 @@
 			</conditions>
 			<actions>
 				<edit_order_param order="this.assignedcontrolled.defaultorder" param="'destination'" value="event.param" />
-				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Target was spotted passing gate sensors into %s'.[event.param.knownname]" output="false" append="true" chance="0" />
+				<debug_text text="'HeadHunter: Target was spotted passing gate sensors into %s'.[event.param.knownname]" filter="scripts" chance="0" />
 			</actions>
 		</handler>
-		<!--<handler comment="take up the mantle">
-		<conditions>
-			<check_any>
-				<event_object_destroyed object="this.assignedcontrolled" check="false"/>
-				<event_object_abandoned object="this.assignedcontrolled" check="false"/>
-			</check_any>
-		</conditions>
-		<actions>
-			<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Commander ded.'" output="false" append="true" chance="100" />
-			<create_order object="this" id="'HeadHunter'" default="true" >
-                <param name="target" value="$target" />
-                <param name="destination" value="$destination" />
-            </create_order>
-		</actions>
-		</handler> -->
 	</interrupts>
 	<init>
 		<!-- Debug & Init -->
@@ -124,8 +89,7 @@
 	<attention min="unknown">
 		<actions>
 			<set_command_action commandaction="commandaction.flying" />
-			<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Searching for bounty target: Age: %s'.[player.age,$target.knownname]"
-				output="false" append="true" chance="$HunterAIDebug" />
+			<debug_text text="'HeadHunter: AI Brain - Searching for bounty target: Age: %s Target: %s IAm: %s %s in %s'.[player.age,$target.knownname,this.ship.idcode,this.ship.knownname,this.ship.sector.knownname]" filter="scripts" chance="$HunterAIDebug" />
 			<label name="fromthetop" />
 			<wait exact="5s"/>
 
@@ -145,7 +109,7 @@
 			<label name="camp" />
 			<do_if value="$searching == true and $findcamping == true">
 				<set_value name="$findcamping" exact="false" />
-				<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Starting sector search...Starting mission timer: %s'.[player.age]" output="false" append="true" chance="$HunterAIDebug" />
+				<debug_text text="'HeadHunter: AI Brain - Starting sector search...Starting mission timer: %s'.[player.age]" filter="scripts" chance="$HunterAIDebug" />
 				<do_if value="$searchingstart == null">
 					<edit_order_param order="this.assignedcontrolled.defaultorder"
 						param="'searchingstart'" value="player.age" />
@@ -189,19 +153,19 @@
 			<!-- Mission timeout. Try random neighbor sector or die -->
 			<do_if value="$searching == true and (player.age gt $searchingstart + $timetocamp)">
 				<debug_to_file name="'hunted'" directory="'HeadHunter'"
-					text="'AI Brain - Search mission failed. Search another sector or die? playerAge is: %s and searchingstart is %s'.[player.age,$searchingstart]"
-					output="false" append="true" chance="$HunterAIDebug" />
+					text="'HeadHunter: AI Brain - Search mission failed. Search another sector or die? playerAge is: %s and searchingstart is %s'.[player.age,$searchingstart]"
+					output="true" append="true" chance="$HunterAIDebug" />
 				<do_if value="this.assignedcontrolled.subordinates.count">
 						<do_all exact="this.assignedcontrolled.subordinates.count" counter="$rc">
 							<do_if value="this.assignedcontrolled.subordinates.{$rc}.typename != 'Drone' and this.assignedcontrolled.subordinates.{$rc}.dockslot">
 								<create_order object="this.assignedcontrolled.subordinates.{$rc}" id="'MoveDie'" immediate="true" >
-									<param name="debugchance" value="100" />
+									<param name="debugchance" value="0" />
 								</create_order>
 							</do_if>
 						</do_all>
 					</do_if>
 				<create_order object="this.assignedcontrolled" id="'MoveDie'" immediate="true" >
-					<param name="debugchance" value="100" />
+					<param name="debugchance" value="0" />
 				</create_order>
 			</do_if>
 

@@ -12,26 +12,27 @@
             <set_value name="$HuntedDebug" exact="0" />
             <debug_to_file name="'hunted'" directory="'HeadHunter'"
                 text="'Init Hunted: On the prowl for profitsss'"
-                output="false" append="false" chance="$HuntedDebug" />
+                output="false" append="true" chance="$HuntedDebug" />
             <create_group groupname="global.$HHHunters" />
+            <do_if value="not global.$HHAllPlayerWanted?">
+                <create_group groupname="global.$HHAllPlayerWanted" />
+            </do_if>
         </actions>
             <cues>
-                <cue name="HunterTimer" instantiate="true" checkinterval="10min" checktime="player.age + 30s">
+                <cue name="HunterTimer" instantiate="true" checkinterval="10m" checktime="player.age + 30s">
                 <conditions>
                     <check_value value="global.$HeadHunterHuntersEnabled" />
                     <check_value value="global.$HHAllPlayerWanted.count gt 0" />
                 </conditions>
                 <actions>
-                    <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                        text="'Head Hunters eligible. HunterTimer firing...'"
-                        output="false" append="true" chance="Init.$HuntedDebug" />
+                    <debug_text text="'HeadHunter: Head Hunters eligible. HunterTimer firing...'" filter="scripts" chance="Init.$HuntedDebug" />
                     <sort_group group="global.$HHAllPlayerWanted" sortbyvalue="loop.element.value" sortdescending="true" />
                     <set_value name="$playertarget" exact="global.$HHAllPlayerWanted.{1}" />
                     <do_if value="global.$HHHunters.count gt 0" comment="Orphan check">
                         <do_for_each name="$timecheckedship" in="global.$HHHunters">
                             <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'%s %s in %s \nSpawntime: %s player.age: %s'.[$timecheckedship.idcode,$timecheckedship.knownname,$timecheckedship.sector.knownname,$timecheckedship.spawntime,player.age]" output="false" append="true" chance="Init.$HuntedDebug" />
                             <do_if value="$timecheckedship.pilot == null">
-                                <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Head Hunter pilot was missing. Cleaning up.'" output="false" append="true" chance="Init.$HuntedDebug" />
+                                <debug_to_file name="'hunted'" directory="'HeadHunter'" text="'Head Hunter pilot was missing probably due to bail and no capture. Cleaning up.'" output="false" append="true" chance="Init.$HuntedDebug" />
                                 <destroy_group group="global.$HHHunters" />
                             </do_if>
                             <do_if value="player.age-$timecheckedship.spawntime ge 45min" >
@@ -41,6 +42,7 @@
                         </do_for_each>
                     </do_if>
                     <signal_cue_instantly cue="SpawnHunters" chance="25" />
+                    <reset_cue cue="TargetClaimed" />
                 </actions>
             </cue>
                 <cue name="SpawnHunters" instantiate="true">
@@ -51,10 +53,22 @@
                     <actions>  
                         <!-- determine size of hunter fleet needed -->
                         <set_value name="$Difficulty" exact="1" /> <!-- 0-3, 0 has no modified radar -->
-                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                        text="'SpawnHunters firing...'"
-                        output="false" append="true" chance="Init.$HuntedDebug" />
-                        <set_value name="$SendingFaction" list="[faction.argon,faction.antigone,faction.teladi,faction.paranid]" />
+                        <debug_text text="'HeadHunter: SpawnHunters firing...'" filter="scripts" chance="Init.$HuntedDebug" />
+                        <set_value name="$HunterFactions" exact="[faction.argon,faction.antigone,faction.teladi,faction.paranid,faction.scaleplate]" />
+                        <do_if value="md.Setup_DLC_Boron?">
+                            <append_to_list name="$HunterFactions" exact="faction.boron"/>
+                        </do_if>
+                        <do_if value="md.Setup_DLC_Pirate?">
+                            <append_to_list name="$HunterFactions" exact="faction.loanshark"/>
+                        </do_if>
+                        <do_if value="md.Setup_DLC_Split?">
+                            <append_to_list name="$HunterFactions" exact="faction.split"/>
+                        </do_if>
+                        <do_if value="md.Setup_DLC_Terran?">
+                            <append_to_list name="$HunterFactions" exact="faction.terran"/>
+                            <append_to_list name="$HunterFactions" exact="faction.pioneers"/>
+                        </do_if>
+                        <set_value name="$SendingFaction" list="$HunterFactions" />
                         <set_value name="$countS" exact="0" />
                         <set_value name="$countM" exact="0" />
                         <set_value name="$countL" exact="0" />
@@ -68,14 +82,12 @@
                             <match shiptype="shiptype.distressdrone" negate="true" />
                             <match shiptype="shiptype.lasertower" negate="true" />
                             <match shiptype="shiptype.smalldrone" negate="true" />
-                            <match_distance max="$playertarget.maxradarrange" object="$playertarget" />
+                            <match_distance max="$playertarget.currentradarrange" object="$playertarget" />
                         </find_gravidar_contact>
                         <!-- Lump the scope target in with the rest of the hostiles group -->
                         <append_to_list name="$supportingtargets" exact="$playertarget" />
                         <do_all exact="$supportingtargets.count" counter="$c">
-                            <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                                text="'Sizing potential player support - Count Number: %s Name: %s Type: %s'.[$c,$supportingtargets.{$c}.knownname,@$supportingtargets.{$c}.type]"
-                                output="false" append="true" chance="Init.$HuntedDebug" />
+                        <debug_text text="'HeadHunter: Sizing potential player support - Count Number: %s Name: %s Type: %s'.[$c,$supportingtargets.{$c}.knownname,@$supportingtargets.{$c}.type]" chance="Init.$HuntedDebug" />
                         </do_all>
                         <!-- Filter out what sizes are in the group -->
                         <do_all exact="$supportingtargets.count" counter="$i">
@@ -92,19 +104,14 @@
                                 <set_value name="$countL" exact="$countL + 3" /> <!-- Bounty hunters probably not rolling carriers but we'll roll 3 DD for each -->
                             </do_elseif>
                         </do_all>
-                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                                text="'Final count: S:%s M:%s L:%s XL:%s'.[$countS,$countM,$countL,$countXL]"
-                                output="false" append="true" chance="Init.$HuntedDebug" />
+                        <debug_text text="'HeadHunter: Final count: S:%s M:%s L:%s XL:%s'.[$countS,$countM,$countL,$countXL]" filter="scripts" chance="Init.$HuntedDebug" />
                         <do_if value="(global.$HeadHunterWantedTracker.{$playertarget}.$value/100 gt 1000000) and (global.$HeadHunterWantedTracker.{$playertarget}.$value/100 le 5000000)" >
                             <set_value name="$Difficulty" exact="2" />
                         </do_if>
                         <do_if value="(global.$HeadHunterWantedTracker.{$playertarget}.$value/100 gt 5000000)" >
                             <set_value name="$Difficulty" exact="3" />
                         </do_if>
-                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                                text="'Difficulty: %s'.[$Difficulty]"
-                                output="false" append="true" chance="Init.$HuntedDebug" />
-
+                        <debug_text text="'HeadHunter: Difficulty: %s'.[$Difficulty]" filter="scripts" chance="Init.$HuntedDebug" />
                        <!-- <set_value name="$NumberS" exact="$countS" comment="stage this for maybe a small random range later. for now exact." />
                         <set_value name="$NumberM" exact="$countM" />
                         <set_value name="$NumberL" exact="$countL" /> -->
@@ -159,14 +166,13 @@
                         <event_cue_signalled />
                     </conditions>
                     <actions>
-                        <debug_to_file name="'hunted'" directory="'HeadHunter'"
-                        text="'Hunters are alive! Maybe...Count: %s'.[this.$LIB_Create_Ships_Result.count]"
-                        output="false" append="true" chance="Init.$HuntedDebug" />
+                        <debug_text text="'HeadHunter: Hunters are alive! Maybe...Count: %s'.[this.$LIB_Create_Ships_Result.count]" filter="scripts" chance="Init.$HuntedDebug" />
                         <do_for_each name="$hunter" in="this.$LIB_Create_Ships_Result" > 
-                            <set_owner object="$hunter" faction="faction.ownerless" />
-                            <set_object_name object="$hunter" name="$SendingFaction.shortname+' '+$hunter.knownname" />
+                            <set_owner object="$hunter" faction="$SendingFaction" />
+                            <!--<set_object_name object="$hunter" name="$SendingFaction.shortname+' '+$hunter.knownname" /> not needed if faction set-->
                             <add_paint_mod object="$hunter" ware="ware.paintmod_0024" />
-                            <set_object_capturable object="$hunter" capturable="false" />
+                            <set_object_capturable object="$hunter" capturable="global.$HeadHunterBoardHunters" />
+                            <set_object_relation_behaviour object="$hunter" disable="true" />
                             <do_if value="$Difficulty == 1">
                                 <add_equipment_mods object="$hunter">
                                     <mods list="[ware.mod_ship_radarrange_01_mk1_headhunter,ware.mod_shield_rechargedelay_01_mk1,ware.mod_engine_travelthrust_01_mk3,ware.mod_weapon_damage_01_mk1]" />
@@ -196,6 +202,110 @@
                         <param name="destination" value="$playertarget.sector" />
                     </create_order>
                     <reset_cue cue="this" />
+                    </actions>
+                </cue>
+                <cue name="HunterCapturedHandler" instantiate="true">
+                    <conditions>
+                        <check_any>
+                            <event_object_changed_owner group="global.$HHHunters" />
+                            <event_object_abandoned group="global.$HHHunters" />
+                        </check_any>
+                    </conditions>
+                    <actions>
+                        <debug_text text="'HeadHunter: Hunter captured :( %s %s'.[event.object.idcode,event.object.knownname]" filter="scripts" chance="Init.$HuntedDebug" />
+                        <remove_from_group group="global.$HHHunters" object="event.object" />
+                    </actions>
+                </cue>
+                <cue name="StartTalk" instantiate="true">
+                    <conditions>
+                        <check_any>
+                            <event_conversation_started conversation="default" />
+                            <event_conversation_returned_to_section section="default"/>
+                        </check_any>
+                        <check_value value="global.$HHHunters.indexof.{event.object.assignedcontrolled}" />
+                        <check_value value="$playertarget?" />
+                    </conditions>
+                    <actions>
+                        <speak actor="event.object" line="[10101]" priority="99" caninterrupt="true" />
+                        <set_value name="$PayoffAmount" exact="global.$HeadHunterWantedTracker.{$playertarget}.$value*10" />
+                        <add_player_choice text="'Payoff Bounty for %s %s: %s Cr'.[$playertarget.idcode,$playertarget.knownname,$PayoffAmount.formatted.default]" section="PayoffBounty"/>
+                    </actions>
+                </cue>
+                <cue name="PayoffBounty" instantiate="true">
+                    <conditions>
+                        <event_conversation_next_section section="PayoffBounty"/>
+                    </conditions>
+                    <actions>
+                        <do_if value="(player.money)f ge ($PayoffAmount)f">
+                            <!--stop attack
+                                maybe attack any other bounty ships on radar
+                            -->
+                            <transfer_money from="faction.player" to="event.object.owner" amount="$PayoffAmount" />
+                            <set_value name="$huntership" exact="event.object.assignedcontrolled" />
+                            <do_for_each name="$hship" in="global.$HHHunters">
+                                <find_station space="$huntership.sector" name="$parkstations" multiple="true" owner="faction.player" negateownerfilter="true" />
+                                <reset_relation_boost object="$hship" faction="faction.player"/>
+                                <cease_fire object="$hship" />
+                                <do_if value="$hship.isclass.ship_l and $hship.defencenpc.exists">
+                                    <signal_objects object="$hship.defencenpc" param="'stop attack'"/>
+                                </do_if>
+                                <create_order object="$hship" id="'MoveDie'" immediate="true" >
+                                    <param name="atstation" value="if $parkstations.count then $parkstations.random else null"/>
+                                    <param name="byhighway" value="not $hship.isclass.[class.ship_l, class.ship_xl]" />
+                                    <param name="byhostile" value="true" />
+									<param name="debugchance" value="0" />
+								</create_order>
+                            </do_for_each>
+                            <remove_from_group group="global.$HHAllPlayerWanted" object="$playertarget" />
+                            <remove_from_group group="global.$HHAllWanted" object="$playertarget" />
+                            <remove_value name="global.$HeadHunterWantedTracker.{$playertarget}" />
+                            <remove_value name="$playertarget" />
+                            <remove_value name="$parkstations"/>
+                            <remove_value name="$parkstation"/>
+                            <start_script object="event.object" name="'player.interaction'">
+                                <param name="Line" value="[10102]"/>
+                                <param name="MaxQueueDelay" value="15s"/>
+                                <param name="interactive" value="false"/>
+                            </start_script>
+                        </do_if>
+                        <do_else>
+                            <start_script object="event.object" name="'player.interaction'">
+                                <param name="Line" value="[10103]"/>
+                                <param name="MaxQueueDelay" value="15s"/>
+                                <param name="interactive" value="false"/>
+                            </start_script>
+                        </do_else>
+                    </actions>
+                </cue>
+                <cue name="TargetClaimed" instantiate="true">
+                    <conditions>
+                        <check_any>
+                            <event_object_destroyed group="global.$HHAllPlayerWanted"/>
+                            <event_object_changed_owner group="global.$HHAllPlayerWanted" />
+                            <event_object_abandoned group="global.$HHAllPlayerWanted" />
+                        </check_any>
+                    </conditions>
+                    <actions>
+                        <do_if value="event.object == $playertarget">
+                            <debug_text text="'HeadHunter: Player target died. Cancel hostiles'" filter="scripts" chance="Init.$HuntedDebug"/>
+                            <do_for_each name="$hunterr" in="global.$HHHunters">
+                                    <find_station space="event.object.sector" name="$parkstations" multiple="true" owner="faction.player" negateownerfilter="true"/>
+                                    <!--<sort_list list="$parkstations" sortbyvalue="loop.element.distanceto.{event.object}" sortdescending="false" />
+                                    <set_value name="$parkstation" exact="$parkstations.{1}" />-->
+                                    <reset_relation_boost object="$hunterr" faction="faction.player"/>
+                                    <cease_fire object="$hunterr"/>
+                                    <do_if value="$hunterr.isclass.[class.ship_l, class.ship_xl] and $hunterr.defencenpc.exists">
+                                        <signal_objects object="$hunterr.defencenpc" param="'stop attack'"/>
+                                    </do_if>
+                                    <create_order object="$hunterr" id="'MoveDie'" immediate="true" >
+                                        <param name="atstation" value="if $parkstations.count then $parkstations.random else null"/>
+                                        <param name="byhighway" value="not $hunterr.isclass.[class.ship_l, class.ship_xl]" />
+                                        <param name="byhostile" value="true" />
+                                        <param name="debugchance" value="0" />
+                                    </create_order>
+                            </do_for_each>
+                            <speak actor="global.$HHHunters.{1}.pilot" line="[1008,10038,12206]" priority="99" caninterrupt="true" />
+                        </do_if>
                     </actions>
                 </cue>
             </cues>

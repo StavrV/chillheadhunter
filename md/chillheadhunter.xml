@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="LoadStuffAndSetup" version="2">
+        <cue name="LoadStuffAndSetup" version="3">
 			<conditions>
 				<event_universe_generated/>
 			</conditions>
@@ -15,6 +15,7 @@
                     <set_value name="global.$HeadHunterHuntersEnabled" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
                     <set_value name="global.$HeadHunterClassicBaddies" exact="false" />
+                    <set_value name="global.$HeadHunterBoardHunters" exact="false" />
                     <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNPCNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNPCNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
                 <do_else>
@@ -26,6 +27,12 @@
                 <do_if value="not global.$HeadHunterClassicBaddies?">
                     <set_value name="global.$HeadHunterClassicBaddies" exact="false" />
                     <debug_text text="'HeadHunter: patched in Classic Baddies option'" filter="scripts" />
+                </do_if>
+            </patch>
+            <patch sinceversion="3">
+                <do_if value="not global.$HeadHunterBoardHunters?">
+                    <set_value name="global.$HeadHunterBoardHunters" exact="false" />
+                    <debug_text text="'HeadHunter: patched in Board Hunters option'" filter="scripts" />
                 </do_if>
             </patch>
 		</cue>
@@ -158,6 +165,26 @@
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                             param="table[
 								$col = 1,
+								$colSpan = 2,
+								$text = 'Capturable Head Hunters',
+								$mouseOverText= 'Allows boarding and capturing of Head Hunter ships',
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                            param="table[
+								$col = 3, 
+								$colSpan = 1,
+								$text = table[
+								  $text   =  if global.$HeadHunterBoardHunters == true then 'Enabled' else 'Disabled', 
+								  $color  =  if global.$HeadHunterBoardHunters == true then 'Helper.color.green' else 'Helper.color.red',
+								  $halign = 'center',
+								],
+								$onClick = BoardHuntersToggle,
+								$onRightClick = BoardHuntersToggle,
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
 								$colSpan = 1,
 								$text = 'General Bounty Multiplier',
 								$mouseOverText= 'Affects non-Wanted bounties only. 1.0x is mod default',
@@ -271,6 +298,27 @@
                         <set_value name="global.$HeadHunterHuntersEnabled"
                             exact="if global.$HeadHunterHuntersEnabled == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="BoardHuntersToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterBoardHunters"
+                            exact="if global.$HeadHunterBoardHunters == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                        <do_if value="global.$HHHunters? and global.$HHHunters.count">
+                            <do_for_each name="$hunter" in="global.$HHHunters" > 
+                                <do_if value="global.$HeadHunterBoardHunters == true" >
+                                    <set_object_capturable object="$hunter" capturable="true" />
+                                </do_if>
+                                <do_else>
+                                    <set_object_capturable object="$hunter" capturable="false" />
+                                </do_else>
+                            </do_for_each>
+                        </do_if>
+                        
                     </actions>
                 </cue>
                 <cue name="ClassicBaddiesToggle" instantiate="true">
