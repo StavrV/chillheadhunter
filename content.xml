@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <content id="ws_2992233767" name="Head Hunter" description="Earn bounties and reputation for destroying enemies and extra bounty for hunting wanted pilots in the galaxy." author="Chillmatica" version="150" date="2023-06-20" save="0" enabled="1" sync="false" lastupdate="1687286931">
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
+  <text language="7" name="Head Hunter" description="Зарабатывайте награды и репутацию за уничтожение врагов и дополнительную награду за охоту на разыскиваемых пилотов в галактике." author="Chillmatica"/>
+  <text language="33" name="Head Hunter" description="Gagnez des primes et une réputation pour avoir détruit des ennemis et une prime supplémentaire pour chasser des pilotes recherchés dans la galaxie." author="Chillmatica"/>
+  <text language="34" name="Head Hunter" description="Gana recompensas y reputación por destruir enemigos y recompensas adicionales por cazar pilotos buscados en la galaxia." author="Chillmatica"/>
+  <text language="44" name="Head Hunter" description="Earn bounties and reputation for destroying enemies and extra bounty for hunting wanted pilots in the galaxy." author="Chillmatica"/>
+  <text language="49" name="Head Hunter" description="Verdienen Sie Kopfgeld und Ruf für die Zerstörung von Feinden und zusätzliches Kopfgeld für die Jagd auf gesuchte Piloten in der Galaxie." author="Chillmatica"/>
+  <text language="86" name="Head Hunter" description="通过消灭敌人获得赏金和声誉，并通过在银河系中追捕通缉飞行员获得额外赏金。" author="Chillmatica"/>
 </content>
