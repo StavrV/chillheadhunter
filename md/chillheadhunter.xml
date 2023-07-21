@@ -93,8 +93,8 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = {8008574,103},
-								$mouseOverText= {8008574,104},
+								$text = {8008574,102},
+								$mouseOverText= {8008574,103},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[

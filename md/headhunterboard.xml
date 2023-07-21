@@ -38,7 +38,7 @@
                             param="table[
                     $id = 'HHBoard',
                     $columns = 12, 
-                    $title = 'HeadHunter Wanted Board',
+                    $title = {8008574,104},
                     $onOpen = HHBoard
                     ]" />
                     </actions>

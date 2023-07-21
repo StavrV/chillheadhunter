@@ -289,9 +289,9 @@
                     </do_if>
                     <do_if value="$wantedclaimer.isplayerowned and not $wantedship.isplayerowned" comment="should handle any funny business of player killing own ship for bounty">
                         <debug_to_file name="'wanted'" directory="'HeadHunter'"
-                        text="'--PLAYERCLAIM-- Exact going to transfer_money: %s Default Formatted: %s Faction formula: %s'.[(global.$HeadHunterWantedTracker.{$wantedship}.$value),global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,0.00016LF + (0.00064LF / (4000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF)]"
+                        text="'--PLAYERCLAIM-- Exact going to transfer_money: %s Default Formatted: %s Faction formula: %s'.[(global.$HeadHunterWantedTracker.{$wantedship}.$value),global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default,0.00016LF + (0.00064LF / (8000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF)]"
                         output="false" append="true" chance="0" />
-                        <add_faction_relation faction="faction.player" otherfaction="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction" value="[0.00016LF + (0.00064LF / (4000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF),0.05].min" reason="relationchangereason.destroyedfactionenemy" />
+                        <add_faction_relation faction="faction.player" otherfaction="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction" value="[0.00016LF + (0.00064LF / (8000000)LF * (global.$HeadHunterWantedTracker.{$wantedship}.$value)LF),0.02].min" reason="relationchangereason.destroyedfactionenemy" />
                         <show_notification text="[[{8008574,134}.[$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default],229,255,102]]" priority="1" />
                         <set_value name="$rewardCr" exact="(global.$HeadHunterWantedTracker.{$wantedship}.$value/100)Cr" />
                         <set_value name="$lastfaction" exact="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction" />
