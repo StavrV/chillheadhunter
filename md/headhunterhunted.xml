@@ -228,7 +228,7 @@
                     <actions>
                         <speak actor="event.object" line="[10101]" priority="99" caninterrupt="true" />
                         <set_value name="$PayoffAmount" exact="global.$HeadHunterWantedTracker.{$playertarget}.$value*10" />
-                        <add_player_choice text="'Payoff Bounty for %s %s: %s Cr'.[$playertarget.idcode,$playertarget.knownname,$PayoffAmount.formatted.default]" section="PayoffBounty"/>
+                        <add_player_choice text="{8008574,137}.[$playertarget.idcode,$playertarget.knownname,$PayoffAmount.formatted.default]" section="PayoffBounty"/>
                     </actions>
                 </cue>
                 <cue name="PayoffBounty" instantiate="true">

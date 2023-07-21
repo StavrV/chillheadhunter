@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<language id="34">
+  <page id="8008574" title="Head Hunter T Files" descr="Spanish" voice="no">
+    <t id="100">Notificaciones de reclamación de búsqueda de NPC</t>
+    <t id="101">Reciba notificaciones de NPC que reclaman recompensas de Se busca.</t>
+    <t id="102">Notificaciones de proximidad de barcos buscados</t>
+    <t id="103">Habilita las notificaciones cuando los barcos de la IA del jugador detectan un barco buscado.</t>
+    <t id="104">Recibe notificaciones de NPC que reclaman recompensas de Se busca.</t>
+    <t id="105">Notificaciones verbales de pago</t>
+    <t id="106">Habilita notificaciones verbales cuando se reclaman recompensas deseadas</t>
+    <t id="107">Marcadores de mapas de barcos buscados por el jugador</t>
+    <t id="108">Mostrar etiquetas de búsqueda en el mapa para los barcos de los jugadores</t>
+    <t id="109">Cazadores de cabezas de jugador</t>
+    <t id="110">Los cazarrecompensas pueden cazarte de vez en cuando</t>
+    <t id="111">Ninguna facción busca recompensas</t>
+    <t id="112">Permitir solo malos clásicos en el tablero de búsqueda (Xenon/Khaak/Pirates)</t>
+    <t id="113">Cazadores de cabezas capturables</t>
+    <t id="114">Permite abordar y capturar barcos de Head Hunter</t>
+    <t id="115">Multiplicador de recompensa general</t>
+    <t id="116">Afecta solo a las recompensas de los no buscados. 1.0x es mod por defecto</t>
+    <t id="117">Restablecer tablero de búsqueda</t>
+    <t id="118">¡No se puede deshacer!</t>
+    <t id="119">RESTABLECER</t>
+    <t id="120">Imprimir tablero de búsqueda</t>
+    <t id="121">Imprimir para iniciar sesión</t>
+    <t id="122">Al habilitar No Wanted Factions, también debe hacer clic en el botón Restablecer tablero de búsqueda</t>
+    <t id="123">LOS MÁS BUSCADOS</t>
+    <t id="124">Facción buscada:</t>
+    <t id="125">Por valor</t>
+    <t id="126">Por distancia</t>
+    <t id="127">Por Intel más reciente</t>
+    <t id="128">Recompensa general ganada</t>
+    <t id="129">%s ha pagado una recompensa general por la destrucción de su enemigo %s %s por la cantidad de %s créditos</t>
+    <t id="130">Reclamo de recompensa\n%s fue destruido en %s por %s\nValor de recompensa: %s créditos</t>
+    <t id="131">Recompensa reclamada: %s</t>
+    <t id="132">%s fue destruido en %s por %s\nValor de recompensa: %s créditos\n%s gracias por sus esfuerzos</t>
+    <t id="133">%s %s fue destruido en %s por %s\nValor de recompensa: %s créditos</t>
+    <t id="134">¡CABEZA RECLAMADA! %s fue destruido en %s por %s\nValor de recompensa: %s créditos</t>
+    <t id="135">¡Se busca barco cerca!\n%s %s por valor de %s créditos</t>
+    <t id="136">Se busca barco detectado\nUbicación: %s\n%s %s por valor de %s créditos</t>
+    <t id="137">Recompensa de pago para %s %s: %s Cr</t>
+    <t id="138">Habilitado</t>
+    <t id="139">Deshabilitado</t>
+  </page>
+</language>

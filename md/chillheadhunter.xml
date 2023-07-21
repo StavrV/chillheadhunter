@@ -22,7 +22,7 @@
                 <do_else>
                     <debug_text text="'HeadHunter Wanted Board was ready.'" filter="scripts" />
                 </do_else>
-                <show_help color="[179,102,255,255]" duration="12s" halign="'center'" position="1" custom="'Head Hunter Mod Installed: This is the way'" />
+                <show_help color="[179,102,255,255]" duration="10s" halign="'center'" position="1" custom="'Head Hunter Mod Installed: This is the way'" />
 			</actions>
             <patch sinceversion="2">
                 <do_if value="not global.$HeadHunterClassicBaddies?">
@@ -73,15 +73,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'NPC Wanted Claim Notifications',
-								$mouseOverText= 'Receive notifications for NPCs claiming Wanted bounties.',
+								$text = {8008574,100},
+								$mouseOverText= {8008574,101},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterNPCNotify == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterNPCNotify == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterNPCNotify == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -93,15 +93,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Wanted Ship Proximity Notifications',
-								$mouseOverText= 'Enables notifications when player AI ships spot a wanted ship.',
+								$text = {8008574,103},
+								$mouseOverText= {8008574,104},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterProximityNotify == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterProximityNotify == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterProximityNotify == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -113,15 +113,15 @@
                                 param="table[
                                     $col = 1,
                                     $colSpan = 2,
-                                    $text = 'Verbal Payout Notifications',
-                                    $mouseOverText= 'Enables verbal notifications when wanted bounties are claimed.',
+                                    $text = {8008574,105},
+                                    $mouseOverText= {8008574,106},
                                 ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                                 param="table[
                                     $col = 3, 
                                     $colSpan = 1,
                                     $text = table[
-                                      $text   =  if global.$HeadHunterPayoutNotify == true then 'Enabled' else 'Disabled', 
+                                      $text   =  if global.$HeadHunterPayoutNotify == true then {8008574,138} else {8008574,139}, 
                                       $color  =  if global.$HeadHunterPayoutNotify == true then 'Helper.color.green' else 'Helper.color.red',
                                       $halign = 'center',
                                     ],
@@ -133,15 +133,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Player Wanted Ship Map Markers',
-								$mouseOverText= 'Show Wanted tags on the map for player ships',
+								$text = {8008574,107},
+								$mouseOverText= {8008574,108},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterPlayerMapTag == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterPlayerMapTag == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterPlayerMapTag == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -153,15 +153,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Player Head Hunters',
-								$mouseOverText= 'Bounty hunters may occasionally hunt you :)',
+								$text = {8008574,109},
+								$mouseOverText= {8008574,110},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterHuntersEnabled == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterHuntersEnabled == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterHuntersEnabled == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -173,15 +173,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'No Faction Wanted Bounties',
-								$mouseOverText= 'Only allow classic baddies on the wanted board (Xenon/Khaak/Pirates)',
+								$text = {8008574,111},
+								$mouseOverText= {8008574,112},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterClassicBaddies == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterClassicBaddies == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterClassicBaddies == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -193,15 +193,15 @@
                             param="table[
 								$col = 1,
 								$colSpan = 2,
-								$text = 'Capturable Head Hunters',
-								$mouseOverText= 'Allows boarding and capturing of Head Hunter ships',
+								$text = {8008574,113},
+								$mouseOverText= {8008574,114},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                             param="table[
 								$col = 3, 
 								$colSpan = 1,
 								$text = table[
-								  $text   =  if global.$HeadHunterBoardHunters == true then 'Enabled' else 'Disabled', 
+								  $text   =  if global.$HeadHunterBoardHunters == true then {8008574,138} else {8008574,139}, 
 								  $color  =  if global.$HeadHunterBoardHunters == true then 'Helper.color.green' else 'Helper.color.red',
 								  $halign = 'center',
 								],
@@ -213,8 +213,8 @@
                             param="table[
 								$col = 1,
 								$colSpan = 1,
-								$text = 'General Bounty Multiplier',
-								$mouseOverText= 'Affects non-Wanted bounties only. 1.0x is mod default',
+								$text = {8008574,115},
+								$mouseOverText= {8008574,116},
 							]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider" 
                             param="table[
@@ -243,15 +243,15 @@
                                 param="table[
                                     $col = 1,
                                     $colSpan = 2,
-                                    $text = 'Reset Wanted Board',
-                                    $mouseOverText= 'Cannot be undone!',
+                                    $text = {8008574,117},
+                                    $mouseOverText= {8008574,118},
                                 ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
                                 param="table[
                                     $col = 3, 
                                     $colSpan = 1,
                                     $text = table[
-                                    $text   =  'RESET', 
+                                    $text   =  {8008574,119}, 
                                     $color  =  'Helper.color.red',
                                     $halign = 'center',
                                     ],
@@ -264,7 +264,7 @@
                                 param="table[
                                     $col = 1,
                                     $colSpan = 2,
-                                    $text = 'Print Wanted Board',
+                                    $text = {8008574,120},
                                     $mouseOverText= '',
                                 ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
@@ -272,7 +272,7 @@
                                     $col = 3, 
                                     $colSpan = 1,
                                     $text = table[
-                                    $text   =  'Print to log', 
+                                    $text   =  {8008574,121}, 
                                     $color  =  'Helper.color.white',
                                     $halign = 'center',
                                     ],
@@ -367,7 +367,7 @@
                             exact="if global.$HeadHunterClassicBaddies == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                         <do_if value="global.$HeadHunterClassicBaddies">
-                            <show_help color="[179,102,255,255]" duration="15s" halign="'center'" position="1" custom="'When enabling No Wanted Factions you should also click the Reset Wanted Board button'" allowclose="true" log="true" force="true"/>
+                            <show_help color="[179,102,255,255]" duration="15s" halign="'center'" position="1" custom="{8008574,122}" allowclose="true" log="true" force="true"/>
                         </do_if>
                     </actions>
                 </cue>

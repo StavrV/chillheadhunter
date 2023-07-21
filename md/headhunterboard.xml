@@ -110,7 +110,7 @@
 						<set_value name="$options_list" exact="[]"/>
 						<do_for_each name="$faction" in="$FactionList">
                             <do_if value="$faction == 'All'">
-                                <set_value name="$name" exact="'MOST WANTED'" />
+                                <set_value name="$name" exact="{8008574,123}" />
                             </do_if>
                             <do_else>
 							    <set_value name="$name" exact="'%s'.[$faction.knownname]"/>
@@ -124,7 +124,7 @@
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Text" param="table[
 							$col = 1,
 							$colSpan = 3,
-							$text = 'Wanted Faction:',
+							$text = {8008574,124},
 							]"/>
 						<signal_cue_instantly cue="md.Simple_Menu_API.Make_Dropdown" param="table[
 							$col = 4, 
@@ -139,15 +139,15 @@
 								],
 							]"/>
                         <do_if value="global.$HHSortValue == 2">
-                            <set_value name="$buttontext" exact="'By Value'" />
+                            <set_value name="$buttontext" exact="{8008574,125}" />
                             <set_value name="$buttoncolor" exact="'Helper.color.green'" />
                         </do_if>
                         <do_elseif value="global.$HHSortValue == 3">
-                            <set_value name="$buttontext" exact="'By Distance'" />
+                            <set_value name="$buttontext" exact="{8008574,126}" />
                             <set_value name="$buttoncolor" exact="'Helper.color.red'" />
                         </do_elseif>
                         <do_elseif value="global.$HHSortValue == 4">
-                            <set_value name="$buttontext" exact="'By Latest Intel'" />
+                            <set_value name="$buttontext" exact="{8008574,127}" />
                             <set_value name="$buttoncolor" exact="'Helper.color.brightyellow'" />
                         </do_elseif>
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"

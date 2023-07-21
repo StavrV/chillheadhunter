@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<language id="33">
+  <page id="8008574" title="Head Hunter T Files" descr="French" voice="no">
+    <t id="100">Notifications de demande de PNJ recherchées</t>
+    <t id="101">Recevez des notifications pour les PNJ réclamant des primes Wanted.</t>
+    <t id="102">Notifications de proximité de navire recherché</t>
+    <t id="103">Active les notifications lorsque les navires de l'IA du joueur repèrent un navire recherché.</t>
+    <t id="104">Recevez des notifications pour les PNJ réclamant des primes Wanted.</t>
+    <t id="105">Notifications verbales de paiement</t>
+    <t id="106">Active les notifications verbales lorsque des primes recherchées sont réclamées</t>
+    <t id="107">Joueur voulait des marqueurs de carte de navire</t>
+    <t id="108">Afficher les balises Wanted sur la carte pour les vaisseaux des joueurs</t>
+    <t id="109">Chasseurs de têtes joueurs</t>
+    <t id="110">Les chasseurs de primes peuvent parfois vous chasser</t>
+    <t id="111">Aucune prime de faction recherchée</t>
+    <t id="112">Autoriser uniquement les méchants classiques sur le tableau recherché (Xenon/Khaak/Pirates)</t>
+    <t id="113">Chasseurs de tête capturables</t>
+    <t id="114">Permet l'embarquement et la capture des navires Head Hunter</t>
+    <t id="115">Multiplicateur de prime général</t>
+    <t id="116">Affecte uniquement les primes non recherchées. 1.0x est le mod par défaut</t>
+    <t id="117">Réinitialiser le tableau recherché</t>
+    <t id="118">Impossible d'annuler !</t>
+    <t id="119">RÉINITIALISER</t>
+    <t id="120">Imprimer le tableau recherché</t>
+    <t id="121">Imprimer pour se connecter</t>
+    <t id="122">Lorsque vous activez No Wanted Factions, vous devez également cliquer sur le bouton Reset Wanted Board</t>
+    <t id="123">LE PLUS RECHERCHÉ</t>
+    <t id="124">Faction recherchée :</t>
+    <t id="125">Par valeur</t>
+    <t id="126">Par distance</t>
+    <t id="127">Par le dernier Intel</t>
+    <t id="128">Gagner une prime générale</t>
+    <t id="129">%s a payé une prime générale pour la destruction de son ennemi %s %s d'un montant de %,s crédits</t>
+    <t id="130">Bounty Claim\n%s a été détruit en %s par %s\nBounty value : %s credits</t>
+    <t id="131">Prime réclamée : %s</t>
+    <t id="132">%s a été détruit en %s par %s\nValeur de la prime : %s crédits\n%s merci pour vos efforts</t>
+    <t id="133">%s %s a été détruit en %s par %s\nValeur de la prime : %s crédits</t>
+    <t id="134">TÊTE RÉCLAMÉE ! %s a été détruit en %s par %s\nValeur de la prime : %s crédits</t>
+    <t id="135">Navire recherché à proximité !\n%s %s vaut %s crédits</t>
+    <t id="136">Navire recherché repéré\nEmplacement : %s\n%s %s valant %s crédits</t>
+    <t id="137">Prix de prime pour %s %s : %s Cr</t>
+    <t id="138">Activé</t>
+    <t id="139">Désactivé</t>
+  </page>
+</language>

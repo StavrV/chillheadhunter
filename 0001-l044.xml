@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<language id="44">
+  <page id="8008574" title="Head Hunter T Files" descr="English UK" voice="no">
+    <t id="100">NPC Wanted Claim Notifications</t>
+		<t id="101">Receive notifications for NPCs claiming Wanted bounties.</t>
+		<t id="102">Wanted Ship Proximity Notifications</t>
+		<t id="103">Enables notifications when player AI ships spot a wanted ship.</t>
+		<t id="104">Receive notifications for NPCs claiming Wanted bounties.</t>
+		<t id="105">Verbal Payout Notifications</t>
+		<t id="106">Enables verbal notifications when wanted bounties are claimed</t>
+		<t id="107">Player Wanted Ship Map Markers</t>
+		<t id="108">Show Wanted tags on the map for player ships</t>
+		<t id="109">Player Head Hunters</t>
+		<t id="110">Bounty hunters may occasionally hunt you</t>
+		<t id="111">No Faction Wanted Bounties</t>
+		<t id="112">Only allow classic baddies on the wanted board (Xenon/Khaak/Pirates)</t>
+		<t id="113">Capturable Head Hunters</t>
+		<t id="114">Allows boarding and capturing of Head Hunter ships</t>
+		<t id="115">General Bounty Multiplier</t>
+		<t id="116">Affects non-Wanted bounties only. 1.0x is mod default</t>
+		<t id="117">Reset Wanted Board</t>
+		<t id="118">Cannot be undone!</t>
+		<t id="119">RESET</t>
+		<t id="120">Print Wanted Board</t>
+		<t id="121">Print to log</t>
+		<t id="122">When enabling No Wanted Factions you should also click the Reset Wanted Board button</t>
+		<t id="123">MOST WANTED</t>
+		<t id="124">Wanted Faction:</t>
+		<t id="125">By Value</t>
+		<t id="126">By Distance</t>
+		<t id="127">By Latest Intel</t>
+		<t id="128">Earned General Bounty</t>
+		<t id="129">%s has paid a general bounty for the destruction of their enemy %s %s in the amount of %,s credits</t>
+		<t id="130">Bounty Claim\n%s was destroyed in %s by %s\nBounty value: %s credits</t>
+		<t id="131">Bounty Claimed: %s</t>
+		<t id="132">%s was destroyed in %s by %s\nBounty value: %s credits\n%s thanks you for your efforts</t>
+		<t id="133">%s %s was destroyed in %s by %s\nBounty value: %s credits</t>
+		<t id="134">HEAD CLAIMED! %s was destroyed in %s by %s\nBounty value: %s credits</t>
+		<t id="135">Wanted Ship Nearby!\n%s %s worth %s credits</t>
+		<t id="136">Wanted Ship Spotted\nLocation: %s\n%s %s worth %s credits</t>
+		<t id="137">Payoff Bounty for %s %s: %s Cr</t>
+		<t id="138">Enabled</t>
+    <t id="139">Disabled</t>
+  </page>
+</language>

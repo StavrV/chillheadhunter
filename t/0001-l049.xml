@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<language id="49">
+  <page id="8008574" title="Head Hunter T Files" descr="German" voice="no">
+    <t id="100">NPC-Fahndungsbenachrichtigungen</t>
+    <t id="101">Erhalten Sie Benachrichtigungen für NPCs, die Fahndungsprämien beanspruchen.</t>
+    <t id="102">Benachrichtigungen über die Nähe eines gesuchten Schiffs</t>
+    <t id="103">Aktiviert Benachrichtigungen, wenn Spieler-KI-Schiffe ein gesuchtes Schiff entdecken.</t>
+    <t id="104">Erhalten Sie Benachrichtigungen für NPCs, die Fahndungsprämien beanspruchen.</t>
+    <t id="105">Mündliche Auszahlungsbenachrichtigungen</t>
+    <t id="106">Ermöglicht verbale Benachrichtigungen, wenn gesuchte Kopfgelder eingefordert werden</t>
+    <t id="107">Von Spieler gesuchte Schiffskartenmarkierungen</t>
+    <t id="108">Gesucht-Tags für Spielerschiffe auf der Karte anzeigen</t>
+    <t id="109">Spieler-Kopfjäger</t>
+    <t id="110">Kopfgeldjäger können dich gelegentlich jagen</t>
+    <t id="111">Keine Fraktion wollte Kopfgelder</t>
+    <t id="112">Erlauben Sie nur klassische Bösewichte auf dem Fahndungsbrett (Xenon/Khaak/Piraten)</t>
+    <t id="113">Einnehmbare Kopfjäger</t>
+    <t id="114">Ermöglicht das Entern und Kapern von Head Hunter-Schiffen</t>
+    <t id="115">Allgemeiner Kopfgeldmultiplikator</t>
+    <t id="116">Betrifft nur nicht gesuchte Kopfgelder. 1.0x ist Mod-Standard</t>
+    <t id="117">Gesucht-Board zurücksetzen</t>
+    <t id="118">Kann nicht rückgängig gemacht werden!</t>
+    <t id="119">ZURÜCKSETZEN</t>
+    <t id="120">Suchtafel drucken</t>
+    <t id="121">Ins Protokoll drucken</t>
+    <t id="122">Wenn Sie No Wanted Factions aktivieren, sollten Sie auch auf die Schaltfläche „Wanted Board zurücksetzen“ klicken</t>
+    <t id="123">MEISTGESUCHT</t>
+    <t id="124">Gesuchte Fraktion:</t>
+    <t id="125">Nach Wert</t>
+    <t id="126">Nach Entfernung</t>
+    <t id="127">Von neuester Intel</t>
+    <t id="128">Allgemeines Kopfgeld verdient</t>
+    <t id="129">%s hat ein allgemeines Kopfgeld für die Zerstörung seines Feindes %s %s in Höhe von %s Credits gezahlt</t>
+    <t id="130">Kopfgeldanspruch\n%s wurde in %s durch %s zerstört\nKopfgeldwert: %s Credits</t>
+    <t id="131">Kopfgeld gefordert: %s</t>
+    <t id="132">%s wurde in %s von %s zerstört\nKopfgeldwert: %s Credits\n%s dankt Ihnen für Ihre Bemühungen</t>
+    <t id="133">%s %s wurde in %s durch %s zerstört\nKopfgeldwert: %s Credits</t>
+    <t id="134">KOPF FORDERT! %s wurde in %s durch %s zerstört\nKopfgeldwert: %s Credits</t>
+    <t id="135">Schiff in der Nähe gesucht!\n%s %s im Wert von %s Credits</t>
+    <t id="136">Gesuchtes Schiff gesichtet\nStandort: %s\n%s %s im Wert von %s Credits</t>
+    <t id="137">Auszahlungsprämie für %s %s: %s Cr</t>
+    <t id="138">Aktiviert</t>
+    <t id="139">Deaktiviert</t>
+  </page>
+</language>
