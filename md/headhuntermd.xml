@@ -295,23 +295,25 @@
                         <show_notification text="[['HEAD CLAIMED! %s was destroyed in %s by %s\nBounty value: %s credits'.[$wantedship.knownname,$claimsector,$wantedclaimer.knownname,global.$HeadHunterWantedTracker.{$wantedship}.$value.formatted.default],229,255,102]]" priority="1" />
                         <set_value name="$rewardCr" exact="(global.$HeadHunterWantedTracker.{$wantedship}.$value/100)Cr" />
                         <set_value name="$lastfaction" exact="global.$HeadHunterWantedTracker.{$wantedship}.$lastvictimfaction" />
-                        <signal_cue_instantly cue="PayoutEffect" param="[$rewardCr,$lastfaction]" />
+                        <transfer_money from="faction.civilian" to="faction.player" amount="$rewardCr" />
+                        <signal_cue_instantly cue="PayoutEffect" param="[$lastfaction]" />
                     </do_if>
                     <remove_from_group group="global.$HHAllWanted" object="$wantedship" />
                     <remove_value name="global.$HeadHunterWantedTracker.{$wantedship}" />
                 </actions>
             </cue>
             <cue name="PayoutEffect" instantiate="true">
-                <conditions><event_cue_signalled /></conditions>
+                <conditions>
+                    <event_cue_signalled />
+                    <check_value value="global.HeadHunterPayoutNotify == true" />
+                </conditions>
                 <delay exact="2s" />
                 <actions>
-                    <set_value name="$FactionRep" exact="event.param.{2}.representative" />
+                    <set_value name="$FactionRep" exact="event.param.{1}.representative" />
                     <speak actor="player.computer" comment="Incoming funds transfer from Faction" priority="90" >
                         <text line="279" />
-                        <name value="event.param.{2}" />
+                        <name value="event.param.{1}" />
                     </speak>
-                    <!-- <transfer_money from="event.param.{2}" to="faction.player" amount="event.param.{1}" /> -->
-                    <transfer_money from="faction.civilian" to="faction.player" amount="event.param.{1}" />
                 </actions>
                 <cues>
                     <cue name="Speaky" instantiate="true">

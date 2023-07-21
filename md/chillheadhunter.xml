@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="LoadStuffAndSetup" version="3">
+        <cue name="LoadStuffAndSetup" version="4">
 			<conditions>
 				<event_universe_generated/>
 			</conditions>
@@ -11,6 +11,7 @@
 					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" />
                     <set_value name="global.$HeadHunterNPCNotify" exact="true" />
                     <set_value name="global.$HeadHunterProximityNotify" exact="true" />
+                    <set_value name="global.$HeadHunterPayoutNotify" exact="true" />
                     <set_value name="global.$HeadHunterPlayerMapTag" exact="true" />
                     <set_value name="global.$HeadHunterHuntersEnabled" exact="true" />
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
@@ -33,6 +34,12 @@
                 <do_if value="not global.$HeadHunterBoardHunters?">
                     <set_value name="global.$HeadHunterBoardHunters" exact="false" />
                     <debug_text text="'HeadHunter: patched in Board Hunters option'" filter="scripts" />
+                </do_if>
+            </patch>
+            <patch sinceversion="4">
+                <do_if value="not global.$HeadHunterPayoutNotify?">
+                    <set_value name="global.$HeadHunterPayoutNotify" exact="true" />
+                    <debug_text text="'HeadHunter: patched in Payout Notify option'" filter="scripts" />
                 </do_if>
             </patch>
 		</cue>
@@ -101,6 +108,26 @@
 								$onClick = ProximityNotifyToggle,
 								$onRightClick = ProximityNotifyToggle,
 							]" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                                param="table[
+                                    $col = 1,
+                                    $colSpan = 2,
+                                    $text = 'Verbal Payout Notifications',
+                                    $mouseOverText= 'Enables verbal notifications when wanted bounties are claimed.',
+                                ]" />
+                            <signal_cue_instantly cue="md.Simple_Menu_API.Make_Button"
+                                param="table[
+                                    $col = 3, 
+                                    $colSpan = 1,
+                                    $text = table[
+                                      $text   =  if global.$HeadHunterPayoutNotify == true then 'Enabled' else 'Disabled', 
+                                      $color  =  if global.$HeadHunterPayoutNotify == true then 'Helper.color.green' else 'Helper.color.red',
+                                      $halign = 'center',
+                                    ],
+                                    $onClick = PayoutNotifyToggle,
+                                    $onRightClick = PayoutNotifyToggle,
+                                ]" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                             param="table[
@@ -277,6 +304,16 @@
                     <actions>
                         <set_value name="global.$HeadHunterProximityNotify"
                             exact="if global.$HeadHunterProximityNotify == true then false else true" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
+                    </actions>
+                </cue>
+                <cue name="PayoutNotifyToggle" instantiate="true">
+                    <conditions>
+                        <event_cue_signalled />
+                    </conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterPayoutNotify"
+                            exact="if global.$HeadHunterPayoutNotify == true then false else true" />
                         <signal_cue_instantly cue="md.Simple_Menu_API.Refresh_Menu" />
                     </actions>
                 </cue>
