@@ -30,7 +30,7 @@
     <t id="126">Nach Entfernung</t>
     <t id="127">Von neuester Intel</t>
     <t id="128">Allgemeines Kopfgeld verdient</t>
-    <t id="129">%s hat ein allgemeines Kopfgeld für die Zerstörung seines Feindes %s %s in Höhe von %s Credits gezahlt</t>
+    <t id="129">%s %s hat %s %s in %s abgeschossen. %s hat ein allgemeines Kopfgeld für die Zerstörung seines Feindes in Höhe von %s Credits gezahlt.</t>
     <t id="130">Kopfgeldanspruch\n%s wurde in %s durch %s zerstört\nKopfgeldwert: %s Credits</t>
     <t id="131">Kopfgeld gefordert: %s</t>
     <t id="132">%s wurde in %s von %s zerstört\nKopfgeldwert: %s Credits\n%s dankt Ihnen für Ihre Bemühungen</t>
@@ -41,5 +41,7 @@
     <t id="137">Auszahlungsprämie für %s %s: %s Cr</t>
     <t id="138">Aktiviert</t>
     <t id="139">Deaktiviert</t>
+    <t id="140">Proximity Notify Value Threshold</t>
+    <t id="141">Wird nur benachrichtigt, wenn sich ein gesuchtes Kopfgeld von mindestens diesem Wert in der Nähe eines Spielerschiffs befindet</t>
   </page>
 </language>

@@ -80,7 +80,7 @@
                                     output="false" append="true" chance="HHAttackTagger.$HHDebug" />
                                 <write_to_logbook category="alerts"
                                     title="{8008574,128}"
-                                    text="{8008574,129}.[$payer,$enemy.knownname,$enemy.idcode,$rewardmodified]"
+                                    text="{8008574,129}.[$attacker.idcode,$attacker.knownname,$enemy.idcode,$enemy.knownname,$attacker.sector.knownname,$payer,$rewardmodified]"
                                     interaction="showonmap" object="$attacker" money="($reward)Cr" bonus="($rewardmodified)Cr-($reward)Cr" />
                                 <transfer_money from="faction.civilian" to="faction.player" amount="$rewardCr" comment="doesnt really matter where it comes from as the payer isnt logged" />
                             </do_if>
@@ -305,7 +305,7 @@
             <cue name="PayoutEffect" instantiate="true">
                 <conditions>
                     <event_cue_signalled />
-                    <check_value value="global.HeadHunterPayoutNotify == true" />
+                    <check_value value="global.$HeadHunterPayoutNotify == true" />
                 </conditions>
                 <delay exact="2s" />
                 <actions>
@@ -360,12 +360,12 @@
                 <actions>
                     <do_for_each name="$contact" in="$contacts">
                         <do_if value="global.$HeadHunterWantedTracker.{$contact}?">
-                            <do_if value="(not @global.$HHThrottled) and (global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify)" >
+                            <do_if value="(not @global.$HHThrottled) and (global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify) and (global.$HeadHunterWantedTracker.{$contact}.$value/100 ge global.$HeadHunterProximityThreshold)" >
                                 <speak actor="player.computer" line="[2021,511]" />
                                 <show_notification text="[[{8008574,135}.[$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="90" />
                                 <set_value name="global.$HHThrottled" exact="true" />
                             </do_if>
-                            <do_elseif value="(not @global.$HHThrottled) and (not global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify)">
+                            <do_elseif value="(not @global.$HHThrottled) and (not global.$PlayerShipsGroup.indexof.{event.object}) and (global.$HeadHunterProximityNotify) and (global.$HeadHunterWantedTracker.{$contact}.$value/100 ge global.$HeadHunterProximityThreshold)">
                                 <play_sound sound="'ui_hud_soft_scan_pos_core'" object="player.entity" type="ui"/>
                                 <show_notification text="[[{8008574,136}.[$contact.sector.knownname,$contact.idcode,$contact.knownname,global.$HeadHunterWantedTracker.{$contact}.$value.formatted.default],179,102,255]]" priority="5" />
                                 <set_value name="global.$HHThrottled" exact="true" />

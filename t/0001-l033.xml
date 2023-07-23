@@ -30,7 +30,7 @@
     <t id="126">Par distance</t>
     <t id="127">Par le dernier Intel</t>
     <t id="128">Gagner une prime générale</t>
-    <t id="129">%s a payé une prime générale pour la destruction de son ennemi %s %s d'un montant de %,s crédits</t>
+    <t id="129">%s %s abattu %s %s à %s. %s a payé une prime générale pour la destruction de son ennemi d'un montant de %,s crédits.</t>
     <t id="130">Bounty Claim\n%s a été détruit en %s par %s\nBounty value : %s credits</t>
     <t id="131">Prime réclamée : %s</t>
     <t id="132">%s a été détruit en %s par %s\nValeur de la prime : %s crédits\n%s merci pour vos efforts</t>
@@ -41,5 +41,7 @@
     <t id="137">Prix de prime pour %s %s : %s Cr</t>
     <t id="138">Activé</t>
     <t id="139">Désactivé</t>
+    <t id="140">Seuil de valeur de notification de proximité</t>
+    <t id="141">Ne soyez averti que lorsqu'une prime recherchée d'au moins cette valeur se trouve à distance d'un navire de joueur</t>
   </page>
 </language>

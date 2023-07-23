@@ -30,7 +30,7 @@
     <t id="126">Por distancia</t>
     <t id="127">Por Intel más reciente</t>
     <t id="128">Recompensa general ganada</t>
-    <t id="129">%s ha pagado una recompensa general por la destrucción de su enemigo %s %s por la cantidad de %s créditos</t>
+    <t id="129">%s %s derribó a %s %s en %s. %s ha pagado una recompensa general por la destrucción de su enemigo por la cantidad de %s créditos.</t>
     <t id="130">Reclamo de recompensa\n%s fue destruido en %s por %s\nValor de recompensa: %s créditos</t>
     <t id="131">Recompensa reclamada: %s</t>
     <t id="132">%s fue destruido en %s por %s\nValor de recompensa: %s créditos\n%s gracias por sus esfuerzos</t>
@@ -41,5 +41,7 @@
     <t id="137">Recompensa de pago para %s %s: %s Cr</t>
     <t id="138">Habilitado</t>
     <t id="139">Deshabilitado</t>
+    <t id="140">Umbral de valor de notificación de proximidad</t>
+    <t id="141">Solo se le notificará cuando una recompensa buscada de al menos este valor esté dentro de la distancia de un barco de jugador</t>
   </page>
 </language>

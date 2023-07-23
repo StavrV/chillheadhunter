@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="LoadStuffAndSetup" version="4">
+        <cue name="LoadStuffAndSetup" version="5">
 			<conditions>
 				<event_universe_generated/>
 			</conditions>
@@ -17,6 +17,7 @@
                     <set_value name="global.$HeadHunterBountyMultiplier" exact="1.0" />
                     <set_value name="global.$HeadHunterClassicBaddies" exact="false" />
                     <set_value name="global.$HeadHunterBoardHunters" exact="false" />
+                    <set_value name="global.$HeadHunterProximityThreshold" exact="0" />
                     <debug_text text="'HeadHunter: initial variables set. WantedTracker: %s \nNPCNotify: %s \nMultiplier: %s \nBounty tracker not found so initialized to empty table.'.[global.$HeadHunterWantedTracker,global.$HeadHunterNPCNotify,global.$HeadHunterBountyMultiplier]" filter="scripts" />
 				</do_if>
                 <do_else>
@@ -40,6 +41,12 @@
                 <do_if value="not global.$HeadHunterPayoutNotify?">
                     <set_value name="global.$HeadHunterPayoutNotify" exact="true" />
                     <debug_text text="'HeadHunter: patched in Payout Notify option'" filter="scripts" />
+                </do_if>
+            </patch>
+            <patch sinceversion="5">
+                <do_if value="not global.$HeadHunterProximityThreshold?">
+                    <set_value name="global.$HeadHunterProximityThreshold" exact="0" />
+                    <debug_text text="'HeadHunter: patched in Proximity notify threshold option'" filter="scripts" />
                 </do_if>
             </patch>
 		</cue>
@@ -108,6 +115,25 @@
 								$onClick = ProximityNotifyToggle,
 								$onRightClick = ProximityNotifyToggle,
 							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
+                            param="table[
+								$col = 1,
+								$colSpan = 1,
+								$text = {8008574,140},
+								$mouseOverText= {8008574,141},
+							]" />
+                        <signal_cue_instantly cue="md.Simple_Menu_API.Make_Slider" 
+                            param="table[
+                                $col = 2,
+                                $colSpan=2,
+                                $start = if global.$HeadHunterProximityThreshold != null then global.$HeadHunterProximityThreshold else 0 ,
+                                $suffix = 'Cr',
+                                $min = 0,
+                                $max = 50000000,
+                                $step = 100000,
+                                $onSliderCellConfirm = HHProximityThresholdConfirm,
+                        ]" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Add_Row" />
                             <signal_cue_instantly cue="md.Simple_Menu_API.Make_Text"
                                 param="table[
@@ -285,6 +311,12 @@
                     <conditions><event_cue_signalled /></conditions>
                     <actions>
                         <set_value name="global.$HeadHunterBountyMultiplier" exact="event.param.$value" />
+                    </actions>
+                </cue>
+                <cue name="HHProximityThresholdConfirm" instantiate="true">
+                    <conditions><event_cue_signalled /></conditions>
+                    <actions>
+                        <set_value name="global.$HeadHunterProximityThreshold" exact="event.param.$value" />
                     </actions>
                 </cue>
                 <cue name="HHNotifyToggle" instantiate="true">

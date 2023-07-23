@@ -30,7 +30,7 @@
 		<t id="126">By Distance</t>
 		<t id="127">By Latest Intel</t>
 		<t id="128">Earned General Bounty</t>
-		<t id="129">%s has paid a general bounty for the destruction of their enemy %s %s in the amount of %,s credits</t>
+		<t id="129">%s %s shot down %s %s in %s. %s has paid a general bounty for the destruction of their enemy in the amount of %,s credits.</t>
 		<t id="130">Bounty Claim\n%s was destroyed in %s by %s\nBounty value: %s credits</t>
 		<t id="131">Bounty Claimed: %s</t>
 		<t id="132">%s was destroyed in %s by %s\nBounty value: %s credits\n%s thanks you for your efforts</t>
@@ -41,5 +41,7 @@
 		<t id="137">Payoff Bounty for %s %s: %s Cr</t>
 		<t id="138">Enabled</t>
 		<t id="139">Disabled</t>
+		<t id="140">Proximity Notify Value Threshold</t>
+		<t id="141">Only be notified when a wanted bounty of at least this value is within distance of a player ship</t>
 	</page>
 </language>
