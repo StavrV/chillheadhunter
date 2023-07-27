@@ -19,7 +19,7 @@
             </do_if>
         </actions>
             <cues>
-                <cue name="HunterTimer" instantiate="true" checkinterval="5s" checktime="player.age + 30s">
+                <cue name="HunterTimer" instantiate="true" checkinterval="600s" checktime="player.age + 30s">
                 <conditions>
                     <check_value value="global.$HeadHunterHuntersEnabled" />
                     <check_value value="global.$HHAllPlayerWanted.count gt 0" />
@@ -41,7 +41,7 @@
                             </do_if>
                         </do_for_each>
                     </do_if>
-                    <signal_cue_instantly cue="SpawnHunters" chance="100" />
+                    <signal_cue_instantly cue="SpawnHunters" chance="25" />
                     <reset_cue cue="TargetClaimed" />
                 </actions>
             </cue>
