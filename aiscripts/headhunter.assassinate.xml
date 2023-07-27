@@ -47,11 +47,22 @@
 							<do_if value="this.assignedcontrolled.subordinates.count">
 								<do_all exact="this.assignedcontrolled.subordinates.count" counter="$i">
 									<set_object_name object="this.assignedcontrolled.subordinates.{$i}" name="this.assignedcontrolled.subordinates.{$i}.knownname+' Head Hunter'" />
+									<set_relation_boost object="this.assignedcontrolled.subordinates.{$i}" faction="faction.player" value="-1" decay="1" delay="10min" silent="true" />
+									<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
+										<param name="primarytarget" value="$contact" />
+										<param name="pursuetargets" value="true" />
+										<param name="pursuedistance" value="1000km" />
+										<param name="allowothertargets" value="false" />
+										<param name="squad_attack" value="true" />
+										<param name="escort" value="$contact" />
+										<param name="checkrelation" value="false" />
+										<param name="debugchance" value="0" />
+									</create_order>
 								</do_all>
 							</do_if>
 							<set_value name="this.assignedcontrolled.pilot.$renamed" exact="true" />
 						</do_if>
-						<set_relation_boost object="$contact" otherobject="this.assignedcontrolled" value="-1" decay="1" delay="10min" silent="false" />
+						<set_relation_boost object="this.assignedcontrolled.subordinates.{$i}" faction="faction.player" value="-1" decay="1" delay="10min" silent="true" />
 						<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
 							<param name="primarytarget" value="$contact" />
 							<param name="pursuetargets" value="true" />

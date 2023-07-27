@@ -19,7 +19,7 @@
             </do_if>
         </actions>
             <cues>
-                <cue name="HunterTimer" instantiate="true" checkinterval="600s" checktime="player.age + 30s">
+                <cue name="HunterTimer" instantiate="true" checkinterval="5s" checktime="player.age + 30s">
                 <conditions>
                     <check_value value="global.$HeadHunterHuntersEnabled" />
                     <check_value value="global.$HHAllPlayerWanted.count gt 0" />
@@ -41,7 +41,7 @@
                             </do_if>
                         </do_for_each>
                     </do_if>
-                    <signal_cue_instantly cue="SpawnHunters" chance="25" />
+                    <signal_cue_instantly cue="SpawnHunters" chance="100" />
                     <reset_cue cue="TargetClaimed" />
                 </actions>
             </cue>
@@ -77,10 +77,6 @@
                         <set_value name="$countL" exact="0" />
                         <set_value name="$countXL" exact="0" />
 
-                        <do_for_each name="$test" in="$HunterFactions">
-                            <debug_text text="'HeadHunter factions list: %s'.[$test.knownname]" filter="scripts" chance="Init.$HuntedDebug" />
-                        </do_for_each>
-
                         <find_gravidar_contact name="$supportingtargets" object="$playertarget" class="[class.ship]" functional="true" owner="faction.player" multiple="true">
                             <match_context macro="$playertarget.sector.macro" />
                             <match class="class.buildstorage" negate="true" />
@@ -98,17 +94,21 @@
                         </do_all>
                         <!-- Filter out what sizes are in the group -->
                         <do_all exact="$supportingtargets.count" counter="$i">
-                            <do_if value="$supportingtargets.{$i}.isclass.ship_s">
+                            <do_if value="$supportingtargets.{$i}.isclass.ship_s and $supportingtargets.{$i}.primarypurpose == purpose.fight">
                                 <set_value name="$countS" exact="$countS + 1" />
+                                <debug_text text="'HeadHunter: Matching S ship with found %s'.[$supportingtargets.{$i}.knownname]" filter="scripts" chance="Init.$HuntedDebug"/>
                             </do_if>
-                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_m">
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_m and $supportingtargets.{$i}.primarypurpose == purpose.fight">
                                 <set_value name="$countM" exact="$countM + 1" />
+                                <debug_text text="'HeadHunter: Matching M ship with found %s'.[$supportingtargets.{$i}.knownname]" filter="scripts" chance="Init.$HuntedDebug" />
                             </do_elseif>
-                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_l">
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_l and $supportingtargets.{$i}.primarypurpose == purpose.fight">
                                 <set_value name="$countL" exact="$countL + 1" />
+                                <debug_text text="'HeadHunter: Matching L ship with found %s'.[$supportingtargets.{$i}.knownname]" filter="scripts" chance="Init.$HuntedDebug"/>
                             </do_elseif>
-                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_xl"> 
+                            <do_elseif value="$supportingtargets.{$i}.isclass.ship_xl and $supportingtargets.{$i}.primarypurpose == purpose.fight"> 
                                 <set_value name="$countL" exact="$countL + 3" /> <!-- Bounty hunters probably not rolling carriers but we'll roll 3 DD for each -->
+                                <debug_text text="'HeadHunter: Matching XL ship with found %s'.[$supportingtargets.{$i}.knownname]" filter="scripts" chance="Init.$HuntedDebug"/>
                             </do_elseif>
                         </do_all>
                         <debug_text text="'HeadHunter: Final count: S:%s M:%s L:%s XL:%s'.[$countS,$countM,$countL,$countXL]" filter="scripts" chance="Init.$HuntedDebug" />
