@@ -19,7 +19,7 @@
             </do_if>
         </actions>
             <cues>
-                <cue name="HunterTimer" instantiate="true" checkinterval="10m" checktime="player.age + 30s">
+                <cue name="HunterTimer" instantiate="true" checkinterval="600s" checktime="player.age + 30s">
                 <conditions>
                     <check_value value="global.$HeadHunterHuntersEnabled" />
                     <check_value value="global.$HHAllPlayerWanted.count gt 0" />
@@ -54,25 +54,32 @@
                         <!-- determine size of hunter fleet needed -->
                         <set_value name="$Difficulty" exact="1" /> <!-- 0-3, 0 has no modified radar -->
                         <debug_text text="'HeadHunter: SpawnHunters firing...'" filter="scripts" chance="Init.$HuntedDebug" />
-                        <set_value name="$HunterFactions" exact="[faction.argon,faction.antigone,faction.teladi,faction.paranid,faction.scaleplate]" />
-                        <do_if value="md.Setup_DLC_Boron?">
-                            <append_to_list name="$HunterFactions" exact="faction.boron"/>
+                        <set_value name="$HunterFactions" exact="[faction.argon,faction.antigone,faction.teladi,faction.paranid,faction.scaleplate,faction.holyorder]" />
+                        <do_if value="md.Setup_DLC_Boron? and md.Setup_DLC_Boron.Boron_Gates_Open_KingdomEnd.state == cuestate.complete">
+                            <append_to_list name="$HunterFactions" exact="@faction.boron"/>
                         </do_if>
                         <do_if value="md.Setup_DLC_Pirate?">
-                            <append_to_list name="$HunterFactions" exact="faction.loanshark"/>
+                            <append_to_list name="$HunterFactions" exact="@faction.loanshark"/>
                         </do_if>
                         <do_if value="md.Setup_DLC_Split?">
-                            <append_to_list name="$HunterFactions" exact="faction.split"/>
+                            <append_to_list name="$HunterFactions" exact="@faction.split"/>
                         </do_if>
                         <do_if value="md.Setup_DLC_Terran?">
-                            <append_to_list name="$HunterFactions" exact="faction.terran"/>
-                            <append_to_list name="$HunterFactions" exact="faction.pioneers"/>
+                            <append_to_list name="$HunterFactions" exact="@faction.terran"/>
+                            <append_to_list name="$HunterFactions" exact="@faction.pioneers"/>
+                        </do_if>
+                        <do_if value="md.Setup_otas_Mod?">
+                            <append_to_list name="$HunterFactions" exact="@faction.otas"/>
                         </do_if>
                         <set_value name="$SendingFaction" list="$HunterFactions" />
                         <set_value name="$countS" exact="0" />
                         <set_value name="$countM" exact="0" />
                         <set_value name="$countL" exact="0" />
                         <set_value name="$countXL" exact="0" />
+
+                        <do_for_each name="$test" in="$HunterFactions">
+                            <debug_text text="'HeadHunter factions list: %s'.[$test.knownname]" filter="scripts" chance="Init.$HuntedDebug" />
+                        </do_for_each>
 
                         <find_gravidar_contact name="$supportingtargets" object="$playertarget" class="[class.ship]" functional="true" owner="faction.player" multiple="true">
                             <match_context macro="$playertarget.sector.macro" />
@@ -117,7 +124,7 @@
                         <set_value name="$NumberL" exact="$countL" /> -->
                     </actions>
                     <cues>
-                        <cue name="CreateHuntersS" ref="md.LIB_Create_Ships.Start"  >
+                        <cue name="CreateHuntersS" ref="md.LIB_Create_Ships.Start" >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
                             <param name="Ship_Amount" value="$countS" />
@@ -131,7 +138,7 @@
                             <param name="AllowBoostingIn" value="true" />
                             <param name="DebugChance" value="0" />
                         </cue>
-                        <cue name="CreateHuntersM" ref="md.LIB_Create_Ships.Start"  >
+                        <cue name="CreateHuntersM" ref="md.LIB_Create_Ships.Start" >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
                             <param name="Ship_Amount" value="$countM" />
@@ -145,7 +152,7 @@
                             <param name="AllowBoostingIn" value="true" />
                             <param name="DebugChance" value="0" />
                         </cue>
-                        <cue name="CreateHuntersL" ref="md.LIB_Create_Ships.Start"  >
+                        <cue name="CreateHuntersL" ref="md.LIB_Create_Ships.Start" >
                             <param name="EndSignalCue" value="HuntersCreated" />
                             <param name="GroupCue" value="HuntersCreated" comment="Ship group is saved to '$GroupCue.$LIB_Create_Ships_Result'" />
                             <param name="Ship_Amount" value="$countL" />

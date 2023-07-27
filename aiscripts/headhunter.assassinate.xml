@@ -51,6 +51,7 @@
 							</do_if>
 							<set_value name="this.assignedcontrolled.pilot.$renamed" exact="true" />
 						</do_if>
+						<set_relation_boost object="$contact" otherobject="this.assignedcontrolled" value="-1" decay="1" delay="10min" silent="false" />
 						<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
 							<param name="primarytarget" value="$contact" />
 							<param name="pursuetargets" value="true" />
@@ -83,7 +84,7 @@
 		<set_value name="$searching" exact="false" />
 		<set_value name="$findcamping" exact="false" />
 		<debug_to_file name="'hunted'" directory="'HeadHunter'"
-			text="'INIT: Assassinate AI order - Starting Log File'" output="false" append="true"
+			text="'INIT: Assassinate AI order - Starting Log File'" output="true" append="true"
 			chance="$HunterAIDebug" />
 	</init>
 	<attention min="unknown">
@@ -136,14 +137,14 @@
 				</do_if>
 				<debug_to_file name="'hunted'" directory="'HeadHunter'"
 					text="'AI Brain - Spots in this sector: %s. Picked: %s'.[$campingspots.count,$targetpos.class]"
-					output="false" append="true" chance="$HunterAIDebug" />
+					output="true" append="true" chance="$HunterAIDebug" />
 				<move_to object="this.ship" destination="$targetpos" abortpath="true"
 					uselocalhighways="if this.assignedcontrolled.iscapitalship then false else true" boost="false" travel="true">
 				</move_to>
 			</do_if>
 			<do_if value="$searching == true and $findcamping == false and this.ship.speed le 0">
 				<debug_to_file name="'hunted'" directory="'HeadHunter'"
-					text="'AI Brain - Moving to next camping spot...'" output="false"
+					text="'AI Brain - Moving to next camping spot...'" output="true"
 					append="true" chance="$HunterAIDebug" />
 				<set_value name="$targetpos" list="$campingspots" />
 				<move_to object="this.ship" destination="$targetpos" abortpath="true"
@@ -171,7 +172,7 @@
 
 			<label name="repaircheck"/>
 			<do_if value="player.age - $lastrepaircheck ge 300s">
-					<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Running repair/resupply checks on the fleet.'" output="false" append="true" chance="$HunterAIDebug" />
+					<debug_to_file name="'hunted'" directory="'HeadHunter'" text="'AI Brain - Running repair/resupply checks on the fleet.'" output="true" append="true" chance="$HunterAIDebug" />
 					<set_value name="$lastrepaircheck" exact="player.age" />
 					<do_if value="this.assignedcontrolled.subordinates.count">
 						<do_all exact="this.assignedcontrolled.subordinates.count" counter="$rc">
