@@ -180,8 +180,20 @@
                             <add_paint_mod object="$hunter" ware="ware.paintmod_0024" />
                             <set_object_capturable object="$hunter" capturable="global.$HeadHunterBoardHunters" />
                             <set_object_relation_behaviour object="$hunter" disable="true" />
-                            <do_if value="$hunter.isclass.[class.ship_l, class.ship_xl] and $hunter.defencenpc.exists">
-                                <set_object_relation_behaviour object="$hunter.defencenpc" disable="true" />
+                            <do_if value="$hunter.isclass.[class.ship_l, class.ship_xl] and $hunter.hasarmeddefencedrones">
+                                <do_all exact="$hunter.availableunits.{unitcategory.defence}.count" counter="$hd">
+                                    <launch_drone name="$locdrone" object="$hunter" category="unitcategory.defence"/>
+                                    <add_to_group groupname="$defencedrones" object="$locdrone" />
+                                    <remove_value name="$locdrone"/>
+                                </do_all>
+                                <do_if value="$defencedrones.count">
+                                    <do_all exact="$defencedrones.count" counter="$i">
+                                        <set_object_relation_behaviour object="$defencedrones.{$i}" disable="true" />
+                                        <create_order id="'DockAndWait'" object="$defencedrones.{$i}" default="true">
+                                            <param name="destination" value="$hunter"/>
+                                        </create_order>
+                                    </do_all>
+                                </do_if>
                             </do_if>
                             <do_if value="$Difficulty == 1">
                                 <add_equipment_mods object="$hunter">

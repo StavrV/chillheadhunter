@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ChillHeadHunter" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
     <cues>
-        <cue name="LoadStuffAndSetup" version="5">
+        <cue name="LoadStuffAndSetup" version="6">
 			<conditions>
 				<event_universe_generated/>
 			</conditions>
@@ -9,7 +9,7 @@
                 <debug_text text="'HeadHunter setup check...'" filter="scripts" />
 				<do_if value="not global.$HeadHunterWantedTracker?">
 					<set_value name="global.$HeadHunterWantedTracker" exact="table[]" />
-                    <set_value name="global.$HeadHunterNPCNotify" exact="true" />
+                    <set_value name="global.$HeadHunterNPCNotify" exact="false" />
                     <set_value name="global.$HeadHunterProximityNotify" exact="true" />
                     <set_value name="global.$HeadHunterPayoutNotify" exact="true" />
                     <set_value name="global.$HeadHunterPlayerMapTag" exact="true" />
@@ -48,6 +48,9 @@
                     <set_value name="global.$HeadHunterProximityThreshold" exact="0" />
                     <debug_text text="'HeadHunter: patched in Proximity notify threshold option'" filter="scripts" />
                 </do_if>
+            </patch>
+            <patch sinceversion="6">
+                <set_value name="global.$HeadHunterNPCNotify" exact="false" />
             </patch>
 		</cue>
         <cue name="HHOptsInit" instantiate="false">

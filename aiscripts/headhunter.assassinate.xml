@@ -62,7 +62,7 @@
 							</do_if>
 							<set_value name="this.assignedcontrolled.pilot.$renamed" exact="true" />
 						</do_if>
-						<set_relation_boost object="this.assignedcontrolled.subordinates.{$i}" faction="faction.player" value="-1" decay="1" delay="10min" silent="true" />
+						<set_relation_boost object="this.assignedcontrolled" faction="faction.player" value="-1" decay="1" delay="10min" silent="true" />
 						<create_order object="this.assignedcontrolled" id="'Attack'" immediate="true">
 							<param name="primarytarget" value="$contact" />
 							<param name="pursuetargets" value="true" />
